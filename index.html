@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" id="metaTheme" content="#F4F5FA">
+<title>Meds · Decimal Time</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💊</text></svg>">
+<style>
+  :root{
+    --bg:#F4F5FA; --glass:rgba(255,255,255,.62); --glass2:rgba(255,255,255,.45);
+    --glass-border:rgba(255,255,255,.75); --hi:rgba(255,255,255,.65);
+    --sheetbg:rgba(246,246,250,.88); --bannerbg:rgba(255,255,255,.75); --tabon:rgba(255,255,255,.85);
+    --label:#101014; --label2:rgba(60,60,67,.62); --label3:rgba(60,60,67,.30);
+    --sep:rgba(60,60,67,.12); --card2:rgba(120,120,128,.14);
+    --tint:#007AFF; --red:#FF3B30; --green:#30B93A; --green2:#34C759; --clock:#FF375F;
+    --mesh:
+      radial-gradient(700px 480px at 12% -5%, rgba(255,55,95,.13), transparent 60%),
+      radial-gradient(760px 520px at 95% 8%, rgba(10,132,255,.13), transparent 60%),
+      radial-gradient(720px 700px at 50% 112%, rgba(175,82,222,.11), transparent 60%);
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#07070D; --glass:rgba(40,40,48,.55); --glass2:rgba(60,60,70,.35);
+      --glass-border:rgba(255,255,255,.14); --hi:rgba(255,255,255,.09);
+      --sheetbg:rgba(24,24,30,.88); --bannerbg:rgba(44,44,52,.78); --tabon:rgba(95,95,105,.6);
+      --label:#FFFFFF; --label2:rgba(235,235,245,.60); --label3:rgba(235,235,245,.30);
+      --sep:rgba(84,84,88,.55); --card2:rgba(120,120,128,.24);
+      --tint:#0A84FF; --red:#FF453A; --green:#30D158; --green2:#30D158;
+      --mesh:
+        radial-gradient(700px 480px at 12% -5%, rgba(255,55,95,.20), transparent 60%),
+        radial-gradient(760px 520px at 95% 8%, rgba(10,132,255,.18), transparent 60%),
+        radial-gradient(720px 700px at 50% 112%, rgba(175,82,222,.16), transparent 60%);
+      color-scheme:dark;
+    }
+    :root:not([data-theme="light"]) .btn-tint{color:color-mix(in srgb, var(--mc, var(--tint)) 70%, #fff)}
+  }
+  :root[data-theme="dark"]{
+    --bg:#07070D; --glass:rgba(40,40,48,.55); --glass2:rgba(60,60,70,.35);
+    --glass-border:rgba(255,255,255,.14); --hi:rgba(255,255,255,.09);
+    --sheetbg:rgba(24,24,30,.88); --bannerbg:rgba(44,44,52,.78); --tabon:rgba(95,95,105,.6);
+    --label:#FFFFFF; --label2:rgba(235,235,245,.60); --label3:rgba(235,235,245,.30);
+    --sep:rgba(84,84,88,.55); --card2:rgba(120,120,128,.24);
+    --tint:#0A84FF; --red:#FF453A; --green:#30D158; --green2:#30D158;
+    --mesh:
+      radial-gradient(700px 480px at 12% -5%, rgba(255,55,95,.20), transparent 60%),
+      radial-gradient(760px 520px at 95% 8%, rgba(10,132,255,.18), transparent 60%),
+      radial-gradient(720px 700px at 50% 112%, rgba(175,82,222,.16), transparent 60%);
+    color-scheme:dark;
+  }
+  :root[data-theme="dark"] .btn-tint{color:color-mix(in srgb, var(--mc, var(--tint)) 70%, #fff)}
+  :root[data-theme="light"]{color-scheme:light}
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{
+    background:var(--bg); color:var(--label);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px; line-height:1.35; padding-bottom:120px; -webkit-font-smoothing:antialiased;
+  }
+  body::before{content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; background:var(--mesh)}
+  button{font:inherit; color:inherit; cursor:pointer; touch-action:manipulation}
+  .wrap{max-width:640px; margin:0 auto; padding:0 16px}
+
+  /* ---------- Header ---------- */
+  header{padding-top:calc(env(safe-area-inset-top,0px) + 20px)}
+  .dateline{font-size:13px; font-weight:600; letter-spacing:.6px; text-transform:uppercase; color:var(--label2)}
+  .titlebar{display:flex; align-items:center; justify-content:space-between; margin-top:2px}
+  .tb-right{display:flex; align-items:center; gap:10px; position:relative}
+  h1{margin:0; font-size:34px; font-weight:800; letter-spacing:-.5px}
+  .plus{
+    width:36px; height:36px; border-radius:50%; font-size:22px; line-height:1; font-weight:500; color:#fff;
+    border:1px solid rgba(255,255,255,.4);
+    background:color-mix(in srgb, var(--tint) 85%, transparent);
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 5px 16px rgba(0,122,255,.35);
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  .plus:hover{transform:scale(1.06)} .plus:active{transform:scale(.94); opacity:.85}
+  .theme-btn{
+    width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--glass-border); background:var(--glass); color:var(--label);
+    backdrop-filter:blur(14px) saturate(160%); -webkit-backdrop-filter:blur(14px) saturate(160%);
+    box-shadow:inset 0 1px 0 var(--hi), 0 3px 10px rgba(0,0,0,.10);
+    transition:transform .15s ease;
+  }
+  .theme-btn:active{transform:scale(.9)}
+  .theme-btn svg{width:19px; height:19px}
+  .theme-tip{
+    position:absolute; right:0; top:44px; padding:5px 13px; border-radius:999px; z-index:5;
+    background:var(--sheetbg); border:1px solid var(--glass-border); color:var(--label);
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    font-size:12px; font-weight:700; box-shadow:0 6px 20px rgba(0,0,0,.15); pointer-events:none;
+    animation:tipIn .25s both, tipOut .3s 1s both;
+  }
+  @keyframes tipIn{from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none}}
+  @keyframes tipOut{to{opacity:0; transform:translateY(-6px)}}
+
+  /* ---------- Glass cards ---------- */
+  .card{
+    background:var(--glass); border:1px solid var(--glass-border); border-radius:22px;
+    backdrop-filter:blur(28px) saturate(180%); -webkit-backdrop-filter:blur(28px) saturate(180%);
+    box-shadow:inset 0 1px 0 var(--hi), 0 10px 30px rgba(0,0,0,.07);
+    padding:14px 16px; margin-top:12px; animation:pop .4s cubic-bezier(.2,.8,.3,1) both;
+  }
+  @keyframes pop{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+
+  .clock-card{position:relative; overflow:hidden}
+  .clock-card::after{
+    content:""; position:absolute; right:-40px; top:-40px; width:150px; height:150px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,55,95,.16), transparent 70%); pointer-events:none;
+  }
+  .kicker{font-size:12px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--label2)}
+  .clock-big{font-size:46px; font-weight:800; letter-spacing:-1px; color:var(--clock);
+    font-variant-numeric:tabular-nums; margin-top:2px}
+
+  .sec-title{margin:26px 4px 0; font-size:13px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--label2)}
+
+  /* ---------- Time groups ---------- */
+  .time-group{margin-top:38px}
+  .time-group:first-child{margin-top:10px}
+  .time-head{display:flex; align-items:center; gap:9px; margin:0 4px}
+  .th-time{font-size:24px; font-weight:800; letter-spacing:-.4px; font-variant-numeric:tabular-nums}
+  .time-group.is-due .th-time{color:var(--red)}
+  .logall{margin-top:10px; font-size:15px; padding:10px}
+
+  /* ---------- Med card ---------- */
+  .medcard{cursor:pointer; transition:box-shadow .2s ease}
+  .medcard:active{transform:scale(.995)}
+  .medcard.is-due{box-shadow:inset 0 1px 0 var(--hi), 0 0 0 2px var(--red), 0 10px 28px rgba(255,59,48,.18)}
+  .mc-top{display:flex; align-items:center; gap:12px}
+  .mib{display:inline-flex; align-items:center; justify-content:center; width:48px; height:38px; flex:none; overflow:hidden}
+  .mib.sm{width:42px; height:30px}
+  .mc-meta{flex:1; min-width:0}
+  .mc-name{font-size:17px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .mc-sub{font-size:13px; color:var(--label2); margin-top:1px}
+  .mc-dose{font-size:12px; font-weight:600; color:var(--label2); margin-top:7px; letter-spacing:.2px}
+  .chip{flex:none; font-size:11px; font-weight:800; letter-spacing:.5px; padding:4px 9px; border-radius:8px;
+    background:rgba(255,59,48,.16); color:var(--red); animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+  .check-ic{flex:none; width:27px; height:27px; border-radius:50%;
+    background:radial-gradient(130% 130% at 30% 18%, color-mix(in srgb, var(--green2) 55%, #fff), var(--green2) 55%, var(--green) 100%);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.65), 0 3px 10px color-mix(in srgb, var(--green) 45%, transparent);
+    animation:checkpop .4s cubic-bezier(.3,1.7,.5,1) both}
+  .check-ic svg{width:15px; height:15px; stroke:#fff; stroke-width:3.2; fill:none; stroke-linecap:round; stroke-linejoin:round;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.18))}
+  @keyframes checkpop{from{transform:scale(.3); opacity:0}to{transform:scale(1); opacity:1}}
+  .mc-timer{display:flex; align-items:baseline; justify-content:space-between; margin-top:8px}
+  .t-num{font-size:30px; font-weight:800; letter-spacing:-.5px; font-variant-numeric:tabular-nums}
+  .t-num.sm{font-size:15px; font-weight:700; letter-spacing:0}
+  .t-cap{font-size:12px; color:var(--label2); text-transform:uppercase; letter-spacing:.5px; font-weight:600}
+  .mc-last{font-size:13px; color:var(--label2); margin-top:2px}
+  .btn{display:block; width:100%; border-radius:14px; padding:11px; margin-top:12px;
+    font-size:16px; font-weight:700; border:1px solid transparent;
+    transition:opacity .15s ease, transform .1s ease}
+  .btn:active{opacity:.65; transform:scale(.99)}
+  .btn-tint{
+    background:color-mix(in srgb, var(--mc, var(--tint)) 16%, transparent);
+    border-color:color-mix(in srgb, var(--mc, var(--tint)) 38%, transparent);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    color:var(--mc, var(--tint));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.35);
+  }
+
+  /* ---------- PRN on-card dose log ---------- */
+  .prn-logs{margin-top:13px; padding-top:9px; border-top:1px solid var(--sep)}
+  .pl-kicker{font-size:11px; font-weight:700; letter-spacing:.7px; text-transform:uppercase; color:var(--label2); padding:0 2px 3px}
+  .plog-row{display:flex; justify-content:space-between; align-items:baseline; padding:8px 2px; font-size:14px}
+  .plog-row + .plog-row{border-top:1px solid var(--sep)}
+  .plog-row .hd{font-weight:700; font-variant-numeric:tabular-nums}
+  .plog-row .hs{color:var(--label2); font-size:13px}
+  .plog-more{text-align:center; font-size:12px; color:var(--label2); padding-top:6px}
+
+  /* ---------- History tab ---------- */
+  .hist-day{margin-top:24px}
+  .hist-day:first-child{margin-top:10px}
+  .day-head{display:flex; align-items:baseline; justify-content:space-between; margin:0 4px 2px}
+  .dh-name{font-size:18px; font-weight:800; letter-spacing:-.2px}
+  .dh-total{font-size:13px; font-weight:600; color:var(--label2)}
+  .hist-card{padding:4px 0}
+  .hrow{display:flex; align-items:center; gap:12px; padding:11px 16px; position:relative}
+  .hrow + .hrow::before{content:""; position:absolute; top:0; left:16px; right:0; height:1px; background:var(--sep)}
+  .hrow .hn{flex:1; min-width:0}
+  .hrow .hn b{display:block; font-size:15px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .hrow .hn span{font-size:12px; color:var(--label2)}
+  .hrow .ht{text-align:right; font-weight:800; font-size:16px; font-variant-numeric:tabular-nums}
+  .hrow .ht span{display:block; font-size:11px; font-weight:600; color:var(--label2)}
+
+  .foot{text-align:center; font-size:12px; color:var(--label3); margin-top:28px}
+
+  /* ---------- Tab bar ---------- */
+  #tabbar{position:fixed; left:50%; transform:translateX(-50%);
+    bottom:calc(10px + env(safe-area-inset-bottom,0px)); width:min(430px, calc(100% - 24px)); z-index:55;
+    display:flex; padding:5px; border-radius:26px;
+    background:var(--glass); border:1px solid var(--glass-border);
+    backdrop-filter:blur(30px) saturate(180%); -webkit-backdrop-filter:blur(30px) saturate(180%);
+    box-shadow:inset 0 1px 0 var(--hi), 0 12px 36px rgba(0,0,0,.18)}
+  .tab{flex:1; border:0; background:transparent; border-radius:20px; padding:7px 4px 5px;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    font-size:11px; font-weight:700; color:var(--label2); position:relative;
+    transition:background .25s ease, color .25s ease}
+  .tab svg{width:24px; height:24px}
+  .tab.on{background:var(--tabon); color:var(--tint); box-shadow:0 2px 10px rgba(0,0,0,.12)}
+  .bdot{position:absolute; top:4px; right:calc(50% - 24px); width:9px; height:9px; border-radius:50%;
+    background:var(--red); border:2px solid var(--bg); animation:pulse 1.6s infinite}
+  .bnum{position:absolute; top:0; right:calc(50% - 30px); min-width:17px; height:17px; border-radius:9px;
+    background:var(--tint); color:#fff; font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 4px}
+
+  /* ---------- Popups (due + info) ---------- */
+  #popupWrap,#infoWrap{position:fixed; inset:0; z-index:100; background:rgba(0,0,0,.42);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    display:flex; align-items:center; justify-content:center; padding:24px; animation:fadeIn .25s both}
+  #infoWrap{z-index:110}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .popup{width:100%; max-width:400px; background:var(--sheetbg); border:1px solid var(--glass-border);
+    border-radius:28px; padding:22px; box-shadow:inset 0 1px 0 var(--hi), 0 24px 70px rgba(0,0,0,.4);
+    backdrop-filter:blur(40px) saturate(180%); -webkit-backdrop-filter:blur(40px) saturate(180%);
+    animation:popUp .45s cubic-bezier(.2,1.3,.4,1) both}
+  .info-pop{max-width:340px}
+  @keyframes popUp{from{opacity:0; transform:scale(.9) translateY(16px)}to{opacity:1; transform:none}}
+  .p-ico{width:58px; height:58px; border-radius:50%; margin:0 auto; display:flex; align-items:center; justify-content:center;
+    color:var(--clock); background:var(--glass); border:1px solid var(--glass-border); box-shadow:inset 0 1px 0 var(--hi)}
+  .popup h3{margin:12px 0 2px; font-size:22px; font-weight:800; text-align:center; letter-spacing:-.3px}
+  .popup .psub{text-align:center; color:var(--label2); font-size:14px}
+  .p-med{display:flex; align-items:center; gap:10px; padding:10px 2px; position:relative}
+  .p-med + .p-med::before{content:""; position:absolute; top:0; left:2px; right:2px; height:1px; background:var(--sep)}
+  .p-btns{display:flex; flex-direction:column; gap:8px; margin-top:14px}
+
+  /* ---------- Pills (flat 2D) ---------- */
+  .sh{position:relative; display:inline-block; border-radius:999px; flex:none;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.10)}
+  .sh-capsule{background:linear-gradient(90deg, var(--L) 0 50%, var(--R) 50% 100%)}
+  .sh-round{border-radius:50%; background-color:var(--c);
+      background-image:linear-gradient(0deg, transparent 46%, rgba(0,0,0,.14) 46% 54%, transparent 54%)}
+  .sh-oval{background-color:var(--c);
+      background-image:linear-gradient(90deg, transparent 47%, rgba(0,0,0,.14) 47% 53%, transparent 53%)}
+  .sh-soft{background-color:var(--c)}
+  .sh-caplet{background-color:var(--c);
+      background-image:linear-gradient(90deg, transparent 47%, rgba(0,0,0,.14) 47% 53%, transparent 53%)}
+  .sh-diamond{border-radius:22%; background-color:var(--c); transform:rotate(45deg)}
+  .sh-hex{border-radius:0; box-shadow:none; background:var(--c);
+      clip-path:polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%)}
+  .sh-oblong{border-radius:50%; background-color:var(--c)}
+  #preview .sh{animation:bob 3.2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  #preview .sh-diamond{animation:bobD 3.2s ease-in-out infinite}
+  @keyframes bobD{0%,100%{transform:rotate(45deg) translateY(0)}50%{transform:rotate(45deg) translateY(-5px)}}
+
+  /* ---------- Empty ---------- */
+  .empty{text-align:center; padding:48px 20px; color:var(--label2)}
+  .empty .mib{width:auto; height:auto; margin-bottom:14px; overflow:visible}
+  .empty b{display:block; font-size:20px; color:var(--label); margin-bottom:4px}
+
+  /* ---------- Sheet ---------- */
+  #scrim{position:fixed; inset:0; background:rgba(0,0,0,.40); opacity:0; transition:opacity .3s ease; z-index:60}
+  #scrim.show{opacity:1}
+  #sheet{position:fixed; left:0; right:0; bottom:0; z-index:70; margin:0 auto; max-width:640px;
+    background:var(--sheetbg); backdrop-filter:blur(44px) saturate(180%); -webkit-backdrop-filter:blur(44px) saturate(180%);
+    border:1px solid var(--glass-border); border-bottom:0;
+    border-radius:28px 28px 0 0; max-height:92dvh; display:flex; flex-direction:column;
+    transform:translateY(105%); transition:transform .42s cubic-bezier(.32,.72,0,1);
+    box-shadow:0 -14px 50px rgba(0,0,0,.30)}
+  #sheet.open{transform:translateY(0)}
+  .grabber{width:36px; height:5px; border-radius:3px; background:var(--label3); margin:8px auto 2px; flex:none}
+  .sheetnav{display:flex; align-items:center; justify-content:space-between; padding:10px 16px 12px; flex:none; position:relative; border-bottom:1px solid var(--sep)}
+  .sheettitle{position:absolute; left:0; right:0; text-align:center; font-weight:700; font-size:17px; pointer-events:none}
+  .navbtn{border:0; background:none; color:var(--tint); font-size:17px; padding:4px 2px; position:relative; z-index:1}
+  .navbtn.bold{font-weight:700}
+  .navbtn:active{opacity:.5}
+  .sheetcontent{overflow-y:auto; padding:0 16px calc(30px + env(safe-area-inset-bottom,0px))}
+
+  /* ---------- Form ---------- */
+  .ghead{margin:22px 4px 6px; font-size:12px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--label2)}
+  .group{background:var(--glass2); border:1px solid var(--glass-border); border-radius:16px; overflow:hidden;
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px)}
+  .row{display:flex; align-items:center; gap:12px; padding:12px 16px; min-height:46px; position:relative}
+  .row + .row::before{content:""; position:absolute; top:0; left:16px; right:0; height:1px; background:var(--sep)}
+  .row label{flex:none}
+  input[type=text]{flex:1; min-width:0; border:0; background:transparent; color:var(--label); font-size:17px; outline:none; text-align:right}
+  input[type=text]::placeholder{color:var(--label3)}
+  .preview-group{display:flex; justify-content:center; padding:26px 16px; margin-top:14px;
+    background:linear-gradient(180deg, var(--glass), color-mix(in srgb, var(--glass) 78%, rgba(0,122,255,.12)))}
+  .shaperow{display:flex; flex-wrap:wrap; gap:8px; padding:14px 12px}
+  .shape-opt{flex:1 1 calc(25% - 8px); min-width:66px; border:1px solid transparent; background:var(--card2); border-radius:14px;
+    padding:10px 4px 8px; display:flex; flex-direction:column; align-items:center; gap:8px;
+    transition:box-shadow .15s ease, background .15s ease}
+  .shape-opt .so-icon{height:28px; display:flex; align-items:center}
+  .shape-opt span.so-label{font-size:10px; font-weight:600; color:var(--label2)}
+  .shape-opt.sel{box-shadow:0 0 0 2.5px var(--tint); background:color-mix(in srgb, var(--tint) 8%, var(--card2))}
+  .shape-opt:active{transform:scale(.96)}
+
+  .switch{width:51px; height:31px; border-radius:16px; border:0; background:var(--card2); position:relative; flex:none; transition:background .2s ease; margin-left:auto}
+  .switch::after{content:""; position:absolute; top:2px; left:2px; width:27px; height:27px; border-radius:50%;
+    background:#fff; box-shadow:0 2px 5px rgba(0,0,0,.25); transition:transform .2s cubic-bezier(.3,1.4,.5,1)}
+  .switch.on{background:var(--green)}
+  .switch.on::after{transform:translateX(20px)}
+
+  .swatches{display:flex; flex-wrap:wrap; gap:11px; padding:14px 16px}
+  .sw{width:32px; height:32px; border-radius:50%; border:0; position:relative;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.12); transition:transform .12s ease}
+  .sw:active{transform:scale(.85)}
+  .sw.sel{box-shadow:0 0 0 2px var(--sheetbg), 0 0 0 4.5px var(--tint)}
+  .sw.sel::after{content:"✓"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800}
+  .sw.custom{background:conic-gradient(red,#ff0,#0f0,#0ff,#00f,#f0f,red)}
+
+  .seg{display:flex; background:var(--card2); border-radius:12px; padding:2px; width:100%}
+  .seg button{flex:1; border:0; background:transparent; padding:7px 6px; border-radius:10px; font-size:13px; font-weight:600; color:var(--label); transition:background .15s ease}
+  .seg button.on{background:var(--sheetbg); box-shadow:0 1px 6px rgba(0,0,0,.18)}
+  .seg.small{width:auto}
+  .seg.small button{padding:5px 14px}
+
+  .timebox{display:flex; align-items:center; justify-content:center; gap:8px}
+  .tin{width:54px; height:44px; border:1px solid transparent; border-radius:11px; background:var(--card2);
+    text-align:center; font-size:21px; font-weight:800; color:var(--label); outline:none; font-variant-numeric:tabular-nums}
+  .tin:focus{border-color:var(--tint)}
+  .colon{font-size:22px; font-weight:800; color:var(--label2)}
+  .del-time{width:26px; height:26px; border-radius:50%; border:0; background:var(--red); color:#fff; font-size:17px; line-height:1; flex:none}
+  .conv{text-align:center; font-size:13px; color:var(--label2); padding:6px 16px}
+  .chips{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; padding:4px 16px 16px}
+  .qchip{border:1px solid var(--glass-border); background:var(--glass2); backdrop-filter:blur(12px);
+    border-radius:999px; padding:6px 14px; font-size:13px; font-weight:600; color:var(--tint); transition:transform .12s ease}
+  .qchip:active{transform:scale(.93)}
+
+  .stepper{display:flex; align-items:center; margin-left:auto; background:var(--card2); border-radius:13px; overflow:hidden; border:1px solid var(--glass-border)}
+  .stepper button{width:46px; height:42px; border:0; background:transparent; font-size:22px; font-weight:600; color:var(--tint)}
+  .stepper button:active{background:color-mix(in srgb, var(--tint) 16%, transparent)}
+  .stepper span{min-width:46px; text-align:center; font-size:20px; font-weight:800; font-variant-numeric:tabular-nums}
+
+  .selwrap{position:relative; flex:none}
+  .unit-sel{appearance:none; -webkit-appearance:none; border:1px solid var(--glass-border); background:var(--card2);
+    color:var(--label); font-size:15px; font-weight:700; font-family:inherit;
+    padding:9px 34px 9px 14px; border-radius:11px; outline:none}
+  .selwrap::after{content:""; position:absolute; right:13px; top:46%; width:7px; height:7px; pointer-events:none;
+    border-right:2px solid var(--label2); border-bottom:2px solid var(--label2); transform:translateY(-60%) rotate(45deg)}
+
+  .needs-attn{box-shadow:0 0 0 2px var(--red) !important; animation:pulse 1s ease-in-out 2}
+
+  /* ---------- Detail / Log ---------- */
+  .detail-hero{display:flex; justify-content:center; padding:26px 0 10px}
+  .detail-name{text-align:center; margin:0; font-size:26px; font-weight:800; letter-spacing:-.4px}
+  .detail-sub{text-align:center; font-size:14px; color:var(--label2); margin-top:3px}
+  .dt-wrap{text-align:center; margin:18px 0 4px}
+  .dt-num{font-size:44px; font-weight:800; letter-spacing:-1px; font-variant-numeric:tabular-nums}
+  .dt-cap{font-size:12px; font-weight:600; letter-spacing:.6px; text-transform:uppercase; color:var(--label2); margin-top:2px}
+  .rowbtn{display:block; width:100%; border:0; background:none; text-align:center; font-size:17px; font-weight:600; padding:2px 0}
+  .rowbtn.tint{color:var(--tint)} .rowbtn.red{color:var(--red)}
+  .hist-row{display:flex; justify-content:space-between; font-size:15px}
+  .hist-row .hd{font-weight:700; font-variant-numeric:tabular-nums}
+  .hist-row .hs{color:var(--label2); font-size:13px}
+
+  /* ---------- Banners ---------- */
+  #banners{position:fixed; top:calc(env(safe-area-inset-top,0px) + 8px); left:12px; right:12px; z-index:90;
+    display:flex; flex-direction:column; gap:8px; pointer-events:none; max-width:616px; margin:0 auto}
+  .banner{pointer-events:auto; display:flex; align-items:center; gap:12px; padding:11px 14px;
+    border-radius:24px; background:var(--bannerbg); border:1px solid var(--glass-border);
+    backdrop-filter:blur(40px) saturate(180%); -webkit-backdrop-filter:blur(40px) saturate(180%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4), 0 10px 34px rgba(0,0,0,.22); cursor:pointer;
+    animation:banIn .5s cubic-bezier(.2,1.2,.4,1) both}
+  @keyframes banIn{from{opacity:0; transform:translateY(-120%)} to{opacity:1; transform:none}}
+  .banner.out{opacity:0; transform:translateY(-120%); transition:all .35s ease}
+  .b-icon{width:40px; height:40px; border-radius:12px; background:var(--sheetbg); display:flex; align-items:center; justify-content:center; flex:none; box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .b-icon.tick-ic{background:var(--green); color:#fff; font-weight:800; font-size:19px}
+  .b-txt{flex:1; min-width:0}
+  .b-txt b{display:block; font-size:15px}
+  .b-txt span{display:block; font-size:14px; color:var(--label2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .b-time{font-size:12px; color:var(--label2); flex:none; align-self:flex-start}
+
+  @media (max-width:400px){ .clock-big{font-size:40px} .t-num{font-size:27px} }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="dateline" id="dateLine"></div>
+    <div class="titlebar">
+      <h1>Medications</h1>
+      <div class="tb-right">
+        <button class="theme-btn" id="themeBtn" aria-label="Colour theme"></button>
+        <button class="plus" id="addBtn" aria-label="Add medication">+</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="tabScheduled">
+    <section class="card clock-card">
+      <div class="kicker">Decimal Time</div>
+      <div class="clock-big" id="decClock">0:00:00</div>
+    </section>
+
+    <div id="notifSlot"></div>
+
+    <h2 class="sec-title">Scheduled</h2>
+    <div id="list"></div>
+  </div>
+
+  <div id="tabPrn" hidden>
+    <div id="prnStats"></div>
+    <h2 class="sec-title">As-Needed · PRN</h2>
+    <div id="prnList"></div>
+  </div>
+
+  <div id="tabHist" hidden>
+    <h2 class="sec-title">PRN History · by day</h2>
+    <div id="histList"></div>
+  </div>
+
+  <p class="foot">All data is saved privately on this device.</p>
+</div>
+
+<nav id="tabbar">
+  <button class="tab on" data-tab="scheduled" aria-label="Scheduled">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    Scheduled
+    <span class="bdot" id="tabDot" hidden></span>
+  </button>
+  <button class="tab" data-tab="prn" aria-label="As needed">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><g transform="rotate(-45 12 12)"><rect x="3" y="9.6" width="18" height="4.8" rx="2.4"/><path d="M12 9.6v4.8"/></g></svg>
+    As-Needed
+    <span class="bnum" id="tabCount" hidden></span>
+  </button>
+  <button class="tab" data-tab="hist" aria-label="History">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5 4 1.5 10 7.5 10"/><path d="M3.8 15a9 9 0 1 0 2-9.4L1.5 10"/><path d="M12 8v4l2.6 1.6"/></svg>
+    History
+  </button>
+</nav>
+
+<div id="banners"></div>
+<div id="scrim" hidden></div>
+<div id="sheet">
+  <div class="grabber"></div>
+  <div class="sheetcontent" id="sheetBody"></div>
+</div>
+
+<script>
+"use strict";
+/* ================= Sound effects ================= */
+let AC = null;
+function newAC(){ try{ return new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ return null; } }
+function ac(){
+  if(AC && AC.state === "closed") AC = null;
+  if(!AC){ AC = newAC(); if(!AC) return null; }
+  if(AC.state !== "running"){ const p = AC.resume(); if(p && p.catch) p.catch(()=>{}); }
+  return AC;
+}
+function reviveAudio(){
+  if(!AC) return;
+  if(AC.state === "running") return;
+  const p = AC.resume(); if(p && p.catch) p.catch(()=>{});
+  setTimeout(() => {
+    if(AC && AC.state !== "running"){
+      try{ AC.close(); }catch(e){}
+      AC = newAC();
+      if(AC && AC.state !== "running"){ const q = AC.resume(); if(q && q.catch) q.catch(()=>{}); }
+    }
+  }, 500);
+}
+document.addEventListener("pointerdown", () => { ac(); }, { capture:true });
+document.addEventListener("touchstart", () => { ac(); }, { capture:true, passive:true });
+
+function tone(f, d, type = "sine", v = .15, f2 = null, delay = 0){
+  const a = ac(); if(!a) return;
+  const t0 = a.currentTime + delay;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t0);
+  if(f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + d);
+  g.gain.setValueAtTime(.0001, t0);
+  g.gain.linearRampToValueAtTime(v, t0 + .012);
+  g.gain.exponentialRampToValueAtTime(.0001, t0 + d);
+  o.connect(g); g.connect(a.destination);
+  o.start(t0); o.stop(t0 + d + .06);
+}
+const SFX = {
+  tap:       () => tone(520, .06, "sine", .12),
+  open:      () => tone(420, .14, "sine", .16, 640),
+  close:     () => tone(560, .12, "sine", .14, 380),
+  save:      () => { tone(659, .09, "triangle", .15); tone(988, .15, "triangle", .15, null, .09); },
+  take:      () => { tone(698, .07, "sine", .16); tone(1046, .17, "sine", .16, null, .07); },
+  step:      () => tone(880, .04, "square", .06),
+  shape:     () => tone(494, .07, "triangle", .14),
+  pick:      () => tone(640, .05, "sine", .13),
+  toggle:    () => tone(480, .09, "sine", .14, 720),
+  del:       () => tone(300, .18, "sawtooth", .10, 160),
+  chip:      () => tone(600, .07, "triangle", .12, 900),
+  addTime:   () => tone(560, .10, "sine", .14, 840),
+  logAll:    () => { tone(523, .09, "sine", .16); tone(659, .09, "sine", .16, null, .09); tone(784, .22, "sine", .16, null, .18); },
+  alert:     () => { tone(880, .12, "sine", .15); tone(880, .12, "sine", .15, null, .22); tone(1175, .22, "sine", .15, null, .44); },
+  info:      () => { tone(740, .09, "sine", .14); tone(560, .14, "sine", .12, null, .09); },
+  tab:       () => tone(540, .08, "sine", .13, 660),
+};
+
+/* ================= Theme (Auto / Light / Dark) ================= */
+const THEME_KEY = "decimalmeds.theme";
+let theme = localStorage.getItem(THEME_KEY);
+if(!["auto","light","dark"].includes(theme)) theme = "auto";
+const mqDark = window.matchMedia("(prefers-color-scheme: dark)");
+const THEME_ICONS = {
+  light: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M4.9 4.9l1.5 1.5M17.6 17.6l1.5 1.5M19.1 4.9l-1.5 1.5M6.4 17.6l-1.5 1.5"/></svg>`,
+  dark:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>`,
+  auto:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>`
+};
+function effectiveDark(){ return theme === "dark" || (theme === "auto" && mqDark.matches); }
+/* Safari keeps frosted/fixed elements on stale layers after variable changes — nudge them to repaint */
+function forceRepaint(){
+  const els = document.querySelectorAll("#tabbar,#sheet,#scrim,#banners,.card,.prn-toggle");
+  els.forEach(el => { el.style.filter = "brightness(.999)"; });
+  void document.body.offsetHeight;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    els.forEach(el => { el.style.filter = ""; });
+  }));
+}
+function applyTheme(){
+  document.documentElement.dataset.theme = theme;
+  $id("themeBtn").innerHTML = THEME_ICONS[theme];
+  $id("metaTheme").content = effectiveDark() ? "#07070D" : "#F4F5FA";
+  forceRepaint();
+}
+function showThemeTip(){
+  const slot = document.querySelector(".tb-right");
+  const old = slot.querySelector(".theme-tip"); if(old) old.remove();
+  const t = document.createElement("span");
+  t.className = "theme-tip";
+  t.textContent = theme === "auto" ? "Auto" : theme === "light" ? "Light" : "Dark";
+  slot.appendChild(t);
+  setTimeout(() => t.remove(), 1400);
+}
+
+/* ================= Decimal time core ================= */
+const DAY_MS = 86400000, DECSEC_MS = 864;
+const pad2 = n => String(n).padStart(2,"0");
+const $id = s => document.getElementById(s);
+
+function secOfDay(d = new Date()){ return d.getHours()*3600 + d.getMinutes()*60 + d.getSeconds() + d.getMilliseconds()/1000; }
+function clockParts(){ const t = secOfDay()/86.4; return { h:Math.floor(t/100), m:Math.floor(t%100), s:Math.floor((t*100)%100) }; }
+function fmtDecMin(v){ return Math.floor(v/100) + ":" + pad2(v%100); }
+function decMinOfTs(ts){ const t = secOfDay(new Date(ts))/86.4; return Math.floor(t/100)*100 + Math.floor(t%100); }
+function durDec(ms){
+  if(ms < 0) ms = 0;
+  const T = ms/DECSEC_MS; let dh = Math.floor(T/10000), rem = T - dh*10000;
+  const days = Math.floor(dh/10); dh %= 10;
+  const dm = Math.floor(rem/100), ds = Math.floor(rem - dm*100);
+  return (days ? days+"d " : "") + dh + ":" + pad2(dm) + ":" + pad2(ds);
+}
+function decTs(ts){ const t = secOfDay(new Date(ts))/86.4; return Math.floor(t/100) + ":" + pad2(Math.floor(t%100)); }
+function dayWord(ts){ const a = new Date(ts).toDateString(), n = new Date(), y = new Date(Date.now()-DAY_MS);
+  if(a === n.toDateString()) return "Today"; if(a === y.toDateString()) return "Yesterday";
+  return new Date(ts).toLocaleDateString([], {month:"short", day:"numeric"}); }
+
+/* ================= Storage + migration ================= */
+const KEY = "decimalmeds.v1";
+let meds = [];
+try{ meds = JSON.parse(localStorage.getItem(KEY)) || []; }catch(e){ meds = []; }
+meds.forEach(m => {
+  if(!Array.isArray(m.times)) m.times = (m.decMin != null ? [m.decMin] : []);
+  if(m.perDose == null) m.perDose = 1;
+  if(m.dose == null) m.dose = "";
+  if(!m.doseUnit) m.doseUnit = "mg";
+  if(m.shape === "triangle") m.shape = "oval";
+  if(m.dose){
+    const mt = /^([\d.,]+)\s*(µg|mcg|ug|mg|g)$/i.exec(String(m.dose).trim());
+    if(mt){ m.dose = mt[1]; m.doseUnit = /^(mcg|ug)$/i.test(mt[2]) ? "µg" : mt[2].toLowerCase(); }
+  }
+  if(Array.isArray(m.history)) m.history = m.history.map(h => typeof h === "number" ? {ts:h, qty:1} : h);
+});
+const save = () => localStorage.setItem(KEY, JSON.stringify(meds));
+save();
+const uid  = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const find = id => meds.find(m => m.id === id);
+const primaryColor = m => (m.shape === "capsule" && !m.mono) ? m.colorL : m.color;
+const doseStr = m => m.dose ? `${m.dose} ${m.doseUnit || "mg"}` : "";
+const doseLine = m => {
+  const p = [];
+  if(m.dose) p.push(doseStr(m));
+  p.push(`${m.perDose || 1} pill${(m.perDose || 1) > 1 ? "s" : ""} per dose`);
+  return p.join(" · ");
+};
+
+function slotDue(med, t, nowTs){
+  const d = new Date(nowTs); d.setHours(0,0,0,0); const start = d.getTime();
+  const base = med.lastTaken || med.created || 0;
+  let occ = start + t*86400;
+  if(occ <= base) occ += DAY_MS;
+  return { occ, isDue: nowTs >= occ };
+}
+function slotTaken(med, t, nowTs){
+  const d = new Date(nowTs); d.setHours(0,0,0,0);
+  return !!(med.lastTaken && med.lastTaken >= d.getTime() + t*86400);
+}
+function dueInfo(med, nowTs = Date.now()){
+  if(med.type !== "scheduled" || !med.times || !med.times.length) return null;
+  const d = new Date(nowTs); d.setHours(0,0,0,0); const start = d.getTime();
+  const base = med.lastTaken || med.created || 0;
+  let next = null;
+  for(let day = 0; day <= 1; day++){
+    for(const t of med.times){
+      const occ = start + day*DAY_MS + t*86400;
+      if(occ > base && (next === null || occ < next)) next = occ;
+    }
+  }
+  if(next === null) next = start + DAY_MS + Math.min(...med.times)*86400;
+  return { dueAt: next, isDue: nowTs >= next };
+}
+function todayStats(m){
+  const td = new Date().toDateString();
+  const es = (m.history||[]).filter(h => new Date(h.ts).toDateString() === td);
+  return { n: es.length, q: es.reduce((s,h) => s + (h.qty||1), 0) };
+}
+function schedText(m){
+  if(m.type === "prn") return "As needed · PRN";
+  const ts = (m.times||[]).slice().sort((a,b) => a-b).map(fmtDecMin);
+  if(!ts.length) return "No times set";
+  if(ts.length === 1) return `Daily · ${ts[0]}`;
+  return `${ts.length}× daily · ${ts.join(" · ")}`;
+}
+
+/* ================= Flat 2D shapes ================= */
+function shapeHTML(m, px){
+  const L = m.colorL || m.color, R = m.colorR || m.color, c = m.color;
+  switch(m.shape){
+    case "capsule":  return `<span class="sh sh-capsule" style="--L:${L};--R:${R};width:${Math.round(px*2.05)}px;height:${px}px"></span>`;
+    case "round":    return `<span class="sh sh-round" style="--c:${c};width:${px}px;height:${px}px"></span>`;
+    case "oval":     return `<span class="sh sh-oval"  style="--c:${c};width:${Math.round(px*1.8)}px;height:${Math.round(px*.92)}px"></span>`;
+    case "softgel":  return `<span class="sh sh-soft"  style="--c:${c};width:${Math.round(px*1.72)}px;height:${Math.round(px*1.05)}px"></span>`;
+    case "caplet":   return `<span class="sh sh-caplet" style="--c:${c};width:${Math.round(px*1.95)}px;height:${Math.round(px*.72)}px"></span>`;
+    case "diamond":  return `<span class="sh sh-diamond" style="--c:${c};width:${Math.round(px*1.1)}px;height:${Math.round(px*1.1)}px"></span>`;
+    case "hexagon":  return `<span class="sh sh-hex" style="--c:${c};width:${Math.round(px*1.7)}px;height:${Math.round(px*1.05)}px"></span>`;
+    case "oblong":   return `<span class="sh sh-oblong" style="--c:${c};width:${Math.round(px*1.32)}px;height:${px}px"></span>`;
+  }
+  return "";
+}
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function lum(hex){ const n = parseInt(hex.slice(1),16); return .299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255); }
+const UNITS = ["mg","g","µg"];
+const CHECK = `<span class="check-ic" title="Taken"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg></span>`;
+
+/* ================= Render ================= */
+const ui = { tab:"scheduled" };
+const listEl = $id("list"), prnListEl = $id("prnList"), histListEl = $id("histList");
+
+function medCard(m, now, opts = {}){
+  const col = primaryColor(m);
+  const st = todayStats(m);
+  const last = m.type === "prn"
+    ? (st.n ? `Today: ${st.n} dose${st.n>1?"s":""} · ${st.q} pill${st.q>1?"s":""}` : "Not taken today")
+    : (m.lastTaken ? `Last dose ${decTs(m.lastTaken)} · ${dayWord(m.lastTaken)}` : "No doses recorded yet");
+  const status = opts.due ? `<span class="chip">DUE</span>` : (opts.taken ? CHECK : "");
+
+  let logsHtml = "";
+  if(opts.logs){
+    const td = new Date(now).toDateString();
+    const todays = (m.history||[]).filter(h => new Date(h.ts).toDateString() === td);
+    if(todays.length){
+      logsHtml = `<div class="prn-logs">
+        <div class="pl-kicker">Today's doses</div>
+        ${todays.slice(0,5).map(h => { const q = h.qty||1; return `
+          <div class="plog-row">
+            <span class="hd">${decTs(h.ts)}</span>
+            <span class="hs">${q} pill${q>1?"s":""}${h.dose ? " · " + esc(h.dose) : ""}</span>
+          </div>`; }).join("")}
+        ${todays.length > 5 ? `<div class="plog-more">+ ${todays.length - 5} more today</div>` : ""}
+      </div>`;
+    }
+  }
+
+  return `<article class="card medcard ${opts.due?"is-due":""}" data-id="${m.id}" style="--mc:${col}">
+    <div class="mc-top">
+      <span class="mib">${shapeHTML(m,22)}</span>
+      <div class="mc-meta">
+        <div class="mc-name">${esc(m.name)}</div>
+        ${(!opts.group && m.type === "prn") ? `<div class="mc-sub">As needed · PRN</div>` : ""}
+      </div>
+      ${status}
+    </div>
+    <div class="mc-dose">${doseLine(m)}</div>
+    <div class="mc-timer">
+      <span class="t-num" data-timer="${m.id}" style="color:${col}">${m.lastTaken ? durDec(now - m.lastTaken) : "—"}</span>
+      <span class="t-cap">since last dose</span>
+    </div>
+    <div class="mc-last">${last}</div>
+    <button class="btn btn-tint take" style="--mc:${col}">${opts.due ? "Take Now" : "Log Dose"}</button>
+    ${logsHtml}
+  </article>`;
+}
+function emptyArt(){
+  return `<div class="empty">
+    <span class="mib">${shapeHTML({shape:"capsule", colorL:"#FF2D55", colorR:"#FF9500"}, 40)}</span>
+    <b>No Scheduled Medications</b>Tap ＋ to add a med with a decimal-time schedule.</div>`;
+}
+
+function fmtUg(ug){
+  const r = n => { const x = Math.round(n*10)/10; return x % 1 ? x.toFixed(1) : String(x); };
+  if(ug >= 1e6) return r(ug/1e6) + " g";
+  if(ug >= 1e3) return r(ug/1e3) + " mg";
+  return r(ug) + " µg";
+}
+function dayHeadName(k){
+  const d = new Date(k); const today = new Date(); today.setHours(0,0,0,0);
+  if(k === today.getTime()) return "Today";
+  if(k === today.getTime() - DAY_MS) return "Yesterday";
+  return d.toLocaleDateString([], {weekday:"short", month:"short", day:"numeric"});
+}
+function buildHistory(){
+  const days = {};
+  meds.filter(m => m.type === "prn").forEach(m => {
+    (m.history||[]).forEach(h => {
+      const d = new Date(h.ts); d.setHours(0,0,0,0); const k = d.getTime();
+      days[k] = days[k] || {};
+      const e = days[k][m.id] = days[k][m.id] || { med:m, qty:0, ug:0, allUnits:true, doses:0 };
+      e.qty += h.qty||1; e.doses++;
+      const mt = h.dose ? /^([\d.,]+)\s*(µg|mg|g)$/i.exec(h.dose.trim()) : null;
+      if(mt){
+        const amt = parseFloat(mt[1].replace(",", "."));
+        const u = mt[2].toLowerCase();
+        e.ug += (h.qty||1) * amt * (u === "g" ? 1e6 : u === "mg" ? 1e3 : 1);
+      }else{ e.allUnits = false; }
+    });
+  });
+  const keys = Object.keys(days).map(Number).sort((a,b) => b-a).slice(0,30);
+  if(!keys.length){
+    return `<div class="empty"><b>No PRN history yet</b>Log a PRN dose and it will be tracked here by day.</div>`;
+  }
+  return keys.map(k => {
+    const entries = Object.values(days[k]);
+    const dayPills = entries.reduce((s,e) => s + e.qty, 0);
+    const rows = entries.sort((a,b) => b.qty - a.qty).map(e => {
+      const amt = (e.allUnits && e.ug > 0) ? fmtUg(e.ug) : "";
+      return `<div class="hrow">
+        <span class="mib sm">${shapeHTML(e.med, 16)}</span>
+        <div class="hn"><b>${esc(e.med.name)}</b><span>${e.doses} dose${e.doses>1?"s":""}${amt ? " · " + amt + " total" : ""}</span></div>
+        <div class="ht">${e.qty}<span>pill${e.qty>1?"s":""}</span></div>
+      </div>`;
+    }).join("");
+    return `<section class="hist-day">
+      <div class="day-head">
+        <span class="dh-name">${dayHeadName(k)}</span>
+        <span class="dh-total">${dayPills} pill${dayPills>1?"s":""} total</span>
+      </div>
+      <div class="card hist-card">${rows}</div>
+    </section>`;
+  }).join("");
+}
+
+function render(){
+  const now = Date.now();
+  const scheduled = meds.filter(m => m.type !== "prn");
+  const prn = meds.filter(m => m.type === "prn");
+
+  const slots = [];
+  scheduled.forEach(m => {
+    (m.times||[]).forEach(t => {
+      let s = slots.find(x => x.t === t);
+      if(!s){ s = { t, entries: [] }; slots.push(s); }
+      s.entries.push(m);
+    });
+  });
+  slots.sort((a,b) => a.t - b.t);
+  listEl.innerHTML = slots.length ? slots.map(s => {
+    const anyDue = s.entries.some(m => slotDue(m, s.t, now).isDue);
+    return `<section class="time-group ${anyDue ? "is-due" : ""}">
+      <div class="time-head">
+        <span class="th-time">${fmtDecMin(s.t)}</span>
+        ${anyDue ? `<span class="chip">DUE</span>` : ""}
+      </div>
+      <button class="btn btn-tint logall" data-logall="${s.t}" style="--mc:var(--tint)">Log All</button>
+      ${s.entries.map(m => medCard(m, now, { due:slotDue(m, s.t, now).isDue, taken:slotTaken(m, s.t, now), group:true })).join("")}
+    </section>`;
+  }).join("") : emptyArt();
+
+  let tn = 0, tq = 0;
+  prn.forEach(m => { const s = todayStats(m); tn += s.n; tq += s.q; });
+  $id("prnStats").innerHTML = prn.length ? `<section class="card">
+      <div class="kicker">Today · As-needed</div>
+      <div style="font-size:28px;font-weight:800;margin-top:2px">${tn} dose${tn!==1?"s":""}
+      <span style="color:var(--label2);font-weight:600">·</span> ${tq} pill${tq!==1?"s":""}</div>
+    </section>` : "";
+  prnListEl.innerHTML = prn.length
+    ? prn.map(m => medCard(m, now, { due:false, taken:todayStats(m).n > 0, logs:true })).join("")
+    : `<div class="empty"><b>No PRN Medications</b>Tap ＋ and choose “As needed · PRN”.</div>`;
+
+  histListEl.innerHTML = buildHistory();
+
+  const anyDue = scheduled.some(m => { const d = dueInfo(m, now); return d && d.isDue; });
+  $id("tabDot").hidden = !anyDue;
+  $id("tabCount").hidden = !prn.length;
+  $id("tabCount").textContent = prn.length;
+}
+function setTab(t){
+  ui.tab = t;
+  document.querySelectorAll(".tab").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
+  $id("tabScheduled").hidden = t !== "scheduled";
+  $id("tabPrn").hidden = t !== "prn";
+  $id("tabHist").hidden = t !== "hist";
+}
+
+/* ================= Dose logging ================= */
+function commitLog(){
+  if(!logState) return;
+  const m = find(logState.id); if(!m) return;
+  const ts = Date.now();
+  m.dose = logState.dose.trim();
+  m.doseUnit = logState.unit;
+  m.lastTaken = ts;
+  m.history = [{ ts, qty:logState.qty, dose:doseStr(m) }, ...(m.history||[])].slice(0,200);
+  save(); render(); closeSheet(); SFX.take();
+  toast(`${m.name} · ${logState.qty} pill${logState.qty>1?"s":""} logged`);
+}
+function takeAll(ids){
+  const ts = Date.now();
+  ids.forEach(id => { const m = find(id); if(!m) return;
+    m.lastTaken = ts;
+    m.history = [{ ts, qty:m.perDose||1, dose:doseStr(m) }, ...(m.history||[])].slice(0,200);
+  });
+  save(); render();
+}
+
+/* ================= Popups ================= */
+function infoPopup(title, msg){
+  const old = $id("infoWrap"); if(old) old.remove();
+  SFX.info();
+  const root = document.createElement("div"); root.id = "infoWrap";
+  root.innerHTML = `<div class="popup info-pop">
+    <div class="p-ico" style="color:var(--tint)">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.5v.5"/></svg>
+    </div>
+    <h3>${esc(title)}</h3>
+    <div class="psub" style="margin-top:4px">${esc(msg)}</div>
+    <div class="p-btns">
+      <button class="btn btn-tint" id="infoOk" style="--mc:var(--tint);margin-top:8px">Got it</button>
+    </div>
+  </div>`;
+  document.body.appendChild(root);
+  root.querySelector("#infoOk").onclick = () => { SFX.close(); root.remove(); };
+  setTimeout(() => { if(root.parentNode) root.remove(); }, 8000);
+}
+function flashEls(els){
+  els.forEach(el => {
+    if(!el) return;
+    el.classList.add("needs-attn");
+    setTimeout(() => el.classList.remove("needs-attn"), 1900);
+  });
+  const first = els.find(Boolean);
+  if(first){ first.scrollIntoView({block:"center", behavior:"smooth"}); try{ first.focus({preventScroll:true}); }catch(e){} }
+}
+
+let popupDismissed = new Set();
+function dueMedsList(now){
+  return meds.filter(m => { const d = dueInfo(m, now); return d && d.isDue && !popupDismissed.has(m.id + ":" + d.dueAt); });
+}
+const BELL = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>`;
+function maybeDuePopup(){
+  if($id("popupWrap")) return;
+  const now = Date.now(), due = dueMedsList(now);
+  if(!due.length) return;
+  SFX.alert();
+  const c = clockParts();
+  const root = document.createElement("div"); root.id = "popupWrap";
+  root.innerHTML = `<div class="popup">
+    <div class="p-ico">${BELL}</div>
+    <h3>${due.length > 1 ? "Time for your meds" : "Time for your med"}</h3>
+    <div class="psub">It's ${c.h}:${pad2(c.m)} in decimal time</div>
+    <div style="margin-top:12px">
+      ${due.map(m => { const d = dueInfo(m, now); return `
+        <div class="p-med">
+          <span class="mib sm">${shapeHTML(m,18)}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:16px">${esc(m.name)}</div>
+            <div style="font-size:12px;color:var(--label2)">Scheduled ${fmtDecMin(decMinOfTs(d.dueAt))} · ${doseLine(m)}</div>
+          </div>
+        </div>`; }).join("")}
+    </div>
+    <div class="p-btns">
+      <button class="btn btn-tint" id="popTake" style="--mc:var(--green);margin-top:4px">Log ${due.length > 1 ? "All " : ""}Now</button>
+      <button class="btn" id="popLater" style="background:transparent;color:var(--label2);margin-top:0">Remind Me Later</button>
+    </div>
+  </div>`;
+  document.body.appendChild(root);
+  root.querySelector("#popTake").onclick = () => {
+    takeAll(due.map(m => m.id));
+    toast(`Logged ${due.length} medication${due.length > 1 ? "s" : ""}`);
+    root.remove();
+  };
+  root.querySelector("#popLater").onclick = () => {
+    SFX.close();
+    due.forEach(m => { const d = dueInfo(m, Date.now()); if(d) popupDismissed.add(m.id + ":" + d.dueAt); });
+    root.remove();
+  };
+}
+let hiddenAt = 0;
+document.addEventListener("visibilitychange", () => {
+  if(document.hidden){ hiddenAt = Date.now(); }
+  else{
+    reviveAudio();
+    forceRepaint();
+    if(hiddenAt && Date.now() - hiddenAt > 30000){ hiddenAt = 0; maybeDuePopup(); }
+  }
+});
+
+/* ================= Live tick ================= */
+let lastNotifCheck = 0, prevDue = "";
+function tick(){
+  const c = clockParts(), now = Date.now();
+  $id("decClock").textContent = `${c.h}:${pad2(c.m)}:${pad2(c.s)}`;
+  document.querySelectorAll("[data-timer]").forEach(el => {
+    const m = find(el.dataset.timer); if(!m) return;
+    el.textContent = m.lastTaken ? durDec(now - m.lastTaken) : "—";
+  });
+  const st = {};
+  meds.forEach(m => {
+    if(m.type === "prn") return;
+    (m.times||[]).forEach(t => { st[m.id + ":" + t] = slotDue(m, t, now).isDue; });
+  });
+  const s = JSON.stringify(st);
+  if(s !== prevDue){ prevDue = s; render(); }
+  if(now - lastNotifCheck > 1000){ lastNotifCheck = now; checkNotifs(now); }
+}
+function checkNotifs(now){
+  let changed = false;
+  meds.forEach(m => {
+    if(m.type !== "scheduled") return;
+    const due = dueInfo(m, now); if(!due) return;
+    const key = String(due.dueAt);
+    if(now >= due.dueAt && now - due.dueAt <= 15*60000 && m.lastNotif !== key){
+      m.lastNotif = key; changed = true;
+      banner(m, due.dueAt); sysNotify(m, due.dueAt);
+    }
+  });
+  if(changed){ save(); render(); }
+}
+
+/* ================= Notifications / banners / toast ================= */
+function sysNotify(m, dueAt){
+  if(!("Notification" in window) || Notification.permission !== "granted") return;
+  try{ new Notification("💊 " + m.name, { body:`Time to take your dose — scheduled ${fmtDecMin(decMinOfTs(dueAt))}.`, tag:m.id + "-" + dueAt }); }catch(e){}
+}
+function banner(m, dueAt){
+  SFX.alert();
+  const b = document.createElement("div");
+  b.className = "banner";
+  b.innerHTML = `<span class="b-icon">${shapeHTML(m,20)}</span>
+    <span class="b-txt"><b>${esc(m.name)}</b><span>Time to take your med · ${fmtDecMin(decMinOfTs(dueAt))}</span></span>
+    <span class="b-time">now</span>`;
+  b.onclick = rm;
+  $id("banners").appendChild(b);
+  setTimeout(rm, 8000);
+  function rm(){ if(!b.parentNode) return; b.classList.add("out"); setTimeout(() => b.remove(), 380); }
+}
+function toast(msg){
+  const b = document.createElement("div");
+  b.className = "banner";
+  b.innerHTML = `<span class="b-icon tick-ic">✓</span><span class="b-txt"><b>${esc(msg)}</b><span>Just now · decimal time</span></span>`;
+  b.onclick = rm; $id("banners").appendChild(b); setTimeout(rm, 4200);
+  function rm(){ if(!b.parentNode) return; b.classList.add("out"); setTimeout(() => b.remove(), 380); }
+}
+function drawNotifCard(){
+  const slot = $id("notifSlot");
+  if(!("Notification" in window)){
+    slot.innerHTML = `<div class="card" style="font-size:13px;color:var(--label2)">Alerts appear here while the app is open. On iPhone, use Share → <b>Add to Home Screen</b> so alerts can show as notifications.</div>`;
+    return;
+  }
+  if(Notification.permission === "granted"){ slot.innerHTML = ""; return; }
+  if(Notification.permission === "denied"){
+    slot.innerHTML = `<div class="card" style="font-size:13px;color:var(--label2)">Notifications are blocked in your browser settings — you'll still see in-app alerts while the app is open.</div>`;
+    return;
+  }
+  slot.innerHTML = `<div class="card" style="display:flex;align-items:center;gap:12px">
+      <div style="flex:1"><b style="font-size:15px">Enable Notifications</b>
+      <div style="font-size:13px;color:var(--label2)">Alerts fire while the app is open. On iPhone, add this page to your Home Screen so they can appear as real notifications.</div></div>
+      <button class="qchip" id="enableNotif" style="flex:none">Enable</button></div>`;
+  $id("enableNotif").onclick = () => { SFX.chip(); Notification.requestPermission().then(drawNotifCard); };
+}
+
+/* ================= Sheets ================= */
+const scrim = $id("scrim"), sheet = $id("sheet"), sheetBody = $id("sheetBody");
+let form = null, logState = null;
+function openSheet(){ scrim.hidden = false; requestAnimationFrame(() => scrim.classList.add("show"));
+  sheet.classList.add("open"); document.body.style.overflow = "hidden"; }
+function closeSheet(){ sheet.classList.remove("open"); scrim.classList.remove("show");
+  document.body.style.overflow = ""; form = null; logState = null; window._detailId = null;
+  setTimeout(() => scrim.hidden = true, 320); }
+scrim.addEventListener("click", () => { SFX.close(); closeSheet(); });
+
+/* ---------- Add / Edit ---------- */
+const PALETTE = [["Red","#FF3B30"],["Orange","#FF9500"],["Yellow","#FFCC00"],["Green","#34C759"],
+  ["Mint","#00C7BE"],["Teal","#30B0C7"],["Sky","#64D2FF"],["Blue","#007AFF"],["Indigo","#5856D6"],
+  ["Purple","#AF52DE"],["Pink","#FF2D55"],["Brown","#A2845E"],["Gray","#8E8E93"],["Charcoal","#3A3A3C"],
+  ["White","#FFFFFF"]];
+const SHAPES = [["capsule","Capsule"],["round","Round"],["oval","Oval"],["softgel","Softgel"],
+  ["caplet","Caplet"],["diamond","Diamond"],["hexagon","Hexagon"],["oblong","Oblong"]];
+
+function openMedSheet(existing, defType){
+  const m = existing || {};
+  logState = null;
+  form = {
+    id: m.id || null,
+    name: m.name || "",
+    shape: m.shape || "capsule",
+    mono: m.mono !== undefined ? m.mono : true,
+    color: m.color || "#007AFF",
+    colorL: m.colorL || "#FF9500",
+    colorR: m.colorR || "#FFCC00",
+    target: "L",
+    type: m.type || defType || "scheduled",
+    tlist: (m.times && m.times.length ? m.times.slice().sort((a,b) => a-b) : [null])
+      .map(v => v == null ? {h:"", m:""} : {h:String(Math.floor(v/100)), m:pad2(v%100)}),
+    dose: m.dose || "",
+    doseUnit: m.doseUnit || "mg",
+    perDose: m.perDose || 1
+  };
+  if(!form.tlist.length) form.tlist = [{h:"", m:""}];
+  drawForm(); openSheet();
+}
+const formMed = () => ({ shape:form.shape, color:form.color,
+  colorL: form.mono ? form.color : form.colorL, colorR: form.mono ? form.color : form.colorR });
+const currentColor = () => (form.shape==="capsule" && !form.mono) ? (form.target==="L"?form.colorL:form.colorR) : form.color;
+function setTargetColor(c){
+  if(form.shape==="capsule" && !form.mono){ if(form.target==="L") form.colorL = c; else form.colorR = c; }
+  else form.color = c;
+}
+function unitSelect(id, sel){
+  return `<span class="selwrap"><select class="unit-sel" id="${id}">
+    ${UNITS.map(u => `<option value="${u}" ${u===sel?"selected":""}>${u}</option>`).join("")}
+  </select></span>`;
+}
+function drawForm(){
+  const editing = !!form.id, isCap = form.shape === "capsule", cur = currentColor();
+  sheetBody.innerHTML = `
+  <div class="sheetnav" style="margin:0 -16px">
+    <button class="navbtn" id="cancelBtn">Cancel</button>
+    <div class="sheettitle">${editing ? "Edit Medication" : "New Medication"}</div>
+    <button class="navbtn bold" id="saveBtn">${editing ? "Save" : "Add"}</button>
+  </div>
+  <section class="group preview-group"><div id="preview">${shapeHTML(formMed(), 88)}</div></section>
+
+  <h3 class="ghead">Name</h3>
+  <section class="group"><div class="row">
+    <input id="fName" type="text" placeholder="e.g. Ibuprofen" value="${esc(form.name)}" autocomplete="off" style="text-align:left">
+  </div></section>
+
+  <h3 class="ghead">Shape</h3>
+  <section class="group"><div class="row shaperow">
+    ${SHAPES.map(([k,l]) => `<button class="shape-opt ${form.shape===k?"sel":""}" data-shape="${k}">
+      <span class="so-icon">${shapeHTML({...formMed(), shape:k}, 20)}</span>
+      <span class="so-label">${l}</span></button>`).join("")}
+  </div></section>
+
+  <h3 class="ghead">Colour</h3>
+  <section class="group">
+    ${isCap ? `<div class="row"><span>Single colour</span>
+      <button class="switch ${form.mono?"on":""}" id="monoSwitch" role="switch" aria-checked="${form.mono}"></button></div>` : ""}
+    ${isCap && !form.mono ? `<div class="row"><span>Colouring</span>
+      <div class="seg small" style="margin-left:auto">
+        <button data-target="L" class="${form.target==="L"?"on":""}">Left half</button>
+        <button data-target="R" class="${form.target==="R"?"on":""}">Right half</button>
+      </div></div>` : ""}
+    <div class="swatches">
+      ${PALETTE.map(([n,hex]) => `<button class="sw ${hex.toLowerCase()===cur.toLowerCase()?"sel":""}"
+        data-c="${hex}" title="${n}" style="background:${hex};color:${lum(hex)>160?"#000":"#fff"}"></button>`).join("")}
+      <label class="sw custom ${PALETTE.every(p=>p[1].toLowerCase()!==cur.toLowerCase())?"sel":""}" title="Custom colour" style="color:#fff">
+        <input type="color" id="customColor" value="${cur}" style="opacity:0;width:100%;height:100%;position:absolute;inset:0;cursor:pointer">
+      </label>
+    </div>
+  </section>
+
+  <h3 class="ghead">Schedule</h3>
+  <section class="group">
+    <div class="row"><div class="seg">
+      <button data-sched="scheduled" class="${form.type==="scheduled"?"on":""}">Scheduled</button>
+      <button data-sched="prn" class="${form.type==="prn"?"on":""}">As needed · PRN</button>
+    </div></div>
+    ${form.type === "scheduled" ? `
+      ${form.tlist.map((t,i) => `<div class="row timerow">
+        <span style="flex:none;font-size:13px;font-weight:600;color:var(--label2);width:52px">Time ${i+1}</span>
+        <div class="timebox" style="flex:1">
+          <input class="tin" data-i="${i}" data-f="h" inputmode="numeric" maxlength="1" placeholder="0" value="${esc(t.h)}" aria-label="decimal hour">
+          <span class="colon">:</span>
+          <input class="tin" data-i="${i}" data-f="m" inputmode="numeric" maxlength="2" placeholder="00" value="${esc(t.m)}" aria-label="decimal minute">
+        </div>
+        ${form.tlist.length > 1 ? `<button class="del-time" data-del="${i}" aria-label="remove time">−</button>` : ""}
+      </div>`).join("")}
+      <div class="row"><button class="rowbtn tint" id="addTime">＋ Add another time</button></div>
+      <div class="conv" id="timeConv"></div>
+      <div class="chips">
+        <button class="qchip" data-q="now">Now</button>
+        <button class="qchip" data-q="300">3:00</button>
+        <button class="qchip" data-q="500">5:00</button>
+        <button class="qchip" data-q="800">8:00</button>
+      </div>` : `<div class="conv" style="padding-bottom:16px">PRN meds live on the As-Needed tab — log them any time, as many times as you need.</div>`}
+  </section>
+
+  <h3 class="ghead">Dose</h3>
+  <section class="group">
+    <div class="row"><label>Dose</label>
+      <input id="fDose" type="text" inputmode="decimal" placeholder="e.g. 200" value="${esc(form.dose)}" style="max-width:120px">
+      ${unitSelect("fUnit", form.doseUnit)}
+    </div>
+    <div class="row"><label>Pills per dose</label>
+      <div class="stepper"><button data-step="-1">−</button><span id="fQty">${form.perDose}</span><button data-step="1">＋</button></div>
+    </div>
+  </section>`;
+  updateConv();
+}
+function updatePreview(){ const p = $id("preview"); if(p) p.innerHTML = shapeHTML(formMed(), 88); }
+function updateConv(){
+  const el = $id("timeConv"); if(!el || !form) return;
+  const parts = form.tlist.map(t => {
+    const h = parseInt(t.h,10), m = parseInt(t.m,10);
+    return (h>=0 && h<=9 && m>=0 && m<=99) ? `${h}:${pad2(m)}` : null;
+  }).filter(Boolean);
+  el.textContent = parts.length ? `Times set: ${parts.join(" · ")}` : "Decimal time — hour 0–9, minutes 00–99 · e.g. 4:70";
+}
+function saveForm(){
+  if(!form) return;
+  const name = form.name.trim();
+  if(!name){
+    infoPopup("Add a name", "Give this medication a name before saving — tap the Name field at the top and type something like “Ibuprofen”.");
+    flashEls([$id("fName")]);
+    return;
+  }
+  let times = [];
+  if(form.type === "scheduled"){
+    const badIdx = [];
+    form.tlist.forEach((t, i) => {
+      const h = parseInt(t.h,10), m = parseInt(t.m,10);
+      if(h>=0 && h<=9 && m>=0 && m<=99) times.push(h*100 + m);
+      else badIdx.push(i);
+    });
+    if(badIdx.length || !times.length){
+      infoPopup("Add a dose time", "Scheduled meds need at least one decimal time. The hour is 0–9 and the minutes are 00–99 — for example 4:70. Fill in the highlighted fields, or use the quick buttons like “Now”.");
+      flashEls(badIdx.flatMap(i => document.querySelectorAll(`.tin[data-i="${i}"]`)));
+      return;
+    }
+    times = [...new Set(times)].sort((a,b) => a-b);
+  }
+  const colors = { color:form.color, mono:form.mono,
+    colorL: form.shape==="capsule" ? (form.mono ? form.color : form.colorL) : form.color,
+    colorR: form.shape==="capsule" ? (form.mono ? form.color : form.colorR) : form.color };
+  const fields = { name, shape:form.shape, type:form.type, times,
+    dose:form.dose.trim(), doseUnit:form.doseUnit, perDose:form.perDose, ...colors };
+  if(form.id){ Object.assign(find(form.id), fields); }
+  else{
+    meds.push({ id:uid(), created:Date.now(), lastTaken:null, history:[], lastNotif:null, ...fields });
+    if(form.type === "scheduled" && "Notification" in window && Notification.permission === "default"){
+      Notification.requestPermission().then(drawNotifCard);
+    }
+  }
+  SFX.save();
+  setTab(form.type === "prn" ? "prn" : "scheduled");
+  save(); render(); closeSheet(); drawNotifCard();
+}
+
+/* ---------- Detail ---------- */
+function openDetail(id){
+  const m = find(id); if(!m) return;
+  form = null; logState = null; window._detailId = id;
+  const col = primaryColor(m);
+  const hist = (m.history||[]).slice(0,8).map(h => { const q = h.qty||1; return `
+    <div class="row hist-row"><span class="hd">${decTs(h.ts)}</span>
+    <span class="hs">${dayWord(h.ts)} · ${q} pill${q>1?"s":""}${h.dose ? " · " + esc(h.dose) : ""}</span></div>`; }).join("");
+  sheetBody.innerHTML = `
+  <div class="sheetnav" style="margin:0 -16px">
+    <button class="navbtn" id="closeDetail">Done</button>
+    <div class="sheettitle">Details</div>
+    <button class="navbtn" id="editFromDetail">Edit</button>
+  </div>
+  <div class="detail-hero">${shapeHTML(m, 82)}</div>
+  <h2 class="detail-name">${esc(m.name)}</h2>
+  <div class="detail-sub">${schedText(m)}</div>
+  <div class="detail-sub" style="margin-top:2px">${doseLine(m)}</div>
+  <div class="dt-wrap">
+    <div class="dt-num" data-timer="${m.id}" style="color:${col}">${m.lastTaken ? durDec(Date.now()-m.lastTaken) : "—"}</div>
+    <div class="dt-cap">since last dose · decimal time</div>
+  </div>
+  <h3 class="ghead">Recent doses</h3>
+  <section class="group">${hist || `<div class="row" style="color:var(--label2);font-size:15px">No doses recorded yet</div>`}</section>
+  <section class="group" style="margin-top:14px">
+    <div class="row"><button class="rowbtn tint" id="dLog">Log a Dose</button></div>
+    <div class="row"><button class="rowbtn red" id="dDelete">Delete Medication</button></div>
+  </section>`;
+  openSheet();
+}
+
+/* ---------- Log dose ---------- */
+function openLogSheet(id){
+  const m = find(id); if(!m) return;
+  form = null; window._detailId = null;
+  logState = { id, qty: m.perDose || 1, dose: m.dose || "", unit: m.doseUnit || "mg" };
+  const col = primaryColor(m);
+  sheetBody.innerHTML = `
+  <div class="sheetnav" style="margin:0 -16px">
+    <button class="navbtn" id="cancelBtn">Cancel</button>
+    <div class="sheettitle">Log Dose</div>
+    <span style="width:52px"></span>
+  </div>
+  <div class="detail-hero" style="padding-bottom:6px">${shapeHTML(m, 70)}</div>
+  <h2 class="detail-name" style="font-size:22px">${esc(m.name)}</h2>
+  <div class="detail-sub">${m.type === "prn" ? "As needed · PRN" : schedText(m)}</div>
+  <h3 class="ghead">This dose</h3>
+  <section class="group">
+    <div class="row"><label>Dose</label>
+      <input id="logDoseInput" type="text" inputmode="decimal" placeholder="e.g. 200" value="${esc(logState.dose)}" style="max-width:120px">
+      ${unitSelect("logUnit", logState.unit)}
+    </div>
+    <div class="row"><label>Quantity</label>
+      <div class="stepper"><button data-step="-1">−</button><span id="logQty">${logState.qty}</span><button data-step="1">＋</button></div>
+    </div>
+    <div class="conv" id="logCap"></div>
+  </section>
+  <button class="btn btn-tint" id="logConfirm" style="--mc:${col};margin-top:18px">Log Dose</button>`;
+  updateLogCap(); openSheet();
+}
+function updateLogCap(){
+  const el = $id("logCap"); if(!el || !logState) return;
+  const q = logState.qty, d = logState.dose.trim();
+  el.textContent = `Logging ${q} pill${q>1?"s":""}${d ? " · " + d + " " + logState.unit : ""} at ${fmtDecMin(decMinOfTs(Date.now()))}`;
+}
+function stepQty(d){
+  SFX.step();
+  if(logState){
+    logState.qty = Math.min(99, Math.max(1, logState.qty + d));
+    const s = $id("logQty"); if(s) s.textContent = logState.qty;
+    updateLogCap();
+  }else if(form){
+    form.perDose = Math.min(20, Math.max(1, form.perDose + d));
+    const s = $id("fQty"); if(s) s.textContent = form.perDose;
+  }
+}
+
+/* ---------- Sheet events ---------- */
+sheetBody.addEventListener("click", e => {
+  const t = e.target.closest("button"); if(!t) return;
+  if(t.id === "cancelBtn" || t.id === "closeDetail"){ SFX.close(); closeSheet(); return; }
+  if(t.id === "saveBtn"){ saveForm(); return; }
+  if(t.id === "editFromDetail"){ SFX.open(); openMedSheet(find(window._detailId)); return; }
+  if(t.id === "dLog"){ SFX.open(); openLogSheet(window._detailId); return; }
+  if(t.id === "logConfirm"){ commitLog(); return; }
+  if(t.id === "dDelete"){
+    SFX.del();
+    if(t.dataset.armed){ meds = meds.filter(m => m.id !== window._detailId); save(); render(); closeSheet(); }
+    else{ t.dataset.armed = "1"; t.textContent = "Tap again to confirm";
+      setTimeout(() => { if(t.isConnected){ delete t.dataset.armed; t.textContent = "Delete Medication"; } }, 2600); }
+    return;
+  }
+  if(t.dataset.step){ stepQty(+t.dataset.step); return; }
+  if(!form) return;
+  if(t.dataset.shape){ SFX.shape(); form.shape = t.dataset.shape; drawForm(); return; }
+  if(t.id === "monoSwitch"){ SFX.toggle(); form.mono = !form.mono; if(form.mono) form.color = form.colorL; drawForm(); return; }
+  if(t.dataset.target){ SFX.toggle(); form.target = t.dataset.target; drawForm(); return; }
+  if(t.dataset.c){ SFX.pick(); setTargetColor(t.dataset.c); drawForm(); return; }
+  if(t.dataset.sched){ SFX.toggle(); form.type = t.dataset.sched; drawForm(); return; }
+  if(t.id === "addTime"){ SFX.addTime(); if(form.tlist.length < 8){ form.tlist.push({h:"", m:""}); drawForm(); } return; }
+  if(t.dataset.del !== undefined){ SFX.del(); form.tlist.splice(+t.dataset.del, 1); drawForm(); return; }
+  if(t.dataset.q){
+    SFX.chip();
+    let h, mm;
+    if(t.dataset.q === "now"){ const c = clockParts(); h = String(c.h); mm = pad2(c.m); }
+    else{ const v = +t.dataset.q; h = String(Math.floor(v/100)); mm = pad2(v%100); }
+    const last = form.tlist[form.tlist.length-1];
+    if(last && last.h === "" && last.m === "") form.tlist[form.tlist.length-1] = {h, m:mm};
+    else if(form.tlist.length < 8) form.tlist.push({h, m:mm});
+    drawForm(); return;
+  }
+});
+sheetBody.addEventListener("input", e => {
+  const el = e.target;
+  if(el.id === "fName" && form){ form.name = el.value; return; }
+  if(el.id === "fDose" && form){ form.dose = el.value; return; }
+  if(el.classList.contains("tin") && form){
+    const i = +el.dataset.i, f = el.dataset.f;
+    el.value = el.value.replace(/\D/g,"").slice(0, f === "h" ? 1 : 2);
+    form.tlist[i][f] = el.value; updateConv(); return;
+  }
+  if(el.id === "logDoseInput" && logState){ logState.dose = el.value; updateLogCap(); return; }
+  if(el.id === "customColor" && form){
+    SFX.pick();
+    setTargetColor(el.value); updatePreview();
+    document.querySelectorAll(".sw").forEach(s => s.classList.toggle("sel", s.classList.contains("custom")));
+  }
+});
+sheetBody.addEventListener("change", e => {
+  if(e.target.id === "logUnit" && logState){ SFX.toggle(); logState.unit = e.target.value; updateLogCap(); }
+  if(e.target.id === "fUnit" && form){ SFX.toggle(); form.doseUnit = e.target.value; }
+});
+
+/* ---------- Main-screen events ---------- */
+$id("addBtn").addEventListener("click", () => { SFX.open(); openMedSheet(null, ui.tab === "prn" ? "prn" : "scheduled"); });
+$id("themeBtn").addEventListener("click", () => {
+  SFX.toggle();
+  theme = theme === "auto" ? "light" : theme === "light" ? "dark" : "auto";
+  localStorage.setItem(THEME_KEY, theme);
+  applyTheme(); showThemeTip();
+});
+document.addEventListener("click", e => {
+  if(e.target.closest("#sheet") || e.target.closest("#banners") || e.target.closest("#popupWrap") || e.target.closest("#infoWrap")) return;
+  const tab = e.target.closest(".tab");
+  if(tab){ SFX.tab(); setTab(tab.dataset.tab); return; }
+  const la = e.target.closest(".logall");
+  if(la){
+    const t = +la.dataset.logall;
+    const ids = meds.filter(m => m.type !== "prn" && (m.times||[]).includes(t)).map(m => m.id);
+    if(ids.length){
+      SFX.logAll();
+      takeAll(ids);
+      toast(`Logged ${ids.length} medication${ids.length > 1 ? "s" : ""} · ${fmtDecMin(t)}`);
+    }
+    return;
+  }
+  const take = e.target.closest(".take");
+  if(take){ SFX.open(); const c = take.closest(".medcard"); if(c && c.dataset.id) openLogSheet(c.dataset.id); return; }
+  const card = e.target.closest(".medcard");
+  if(card && card.dataset.id){ SFX.tap(); openDetail(card.dataset.id); return; }
+});
+
+/* ================= Init ================= */
+applyTheme();
+if(mqDark.addEventListener) mqDark.addEventListener("change", () => { if(theme === "auto") applyTheme(); });
+$id("dateLine").textContent = new Date().toLocaleDateString([], {weekday:"long", month:"long", day:"numeric"});
+setTab("scheduled");
+drawNotifCard();
+render();
+tick();
+setInterval(tick, 250);
+setTimeout(maybeDuePopup, 700);
+</script>
+</body>
+</html>
