@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Decimal Meds">
+<title>Decimal Meds</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+:root{--bg:#F4EFE3;--bg2:#FFFFFF;--bg3:#E9E1CC;--ink:#1A1A1A;--red:#D7263D;--red-dim:#A11B2C;--red-tint:#F6D3D8;--yellow:#FFD100;--yellow-dim:#D1A800;--blue:#1B4F9C;--blue-dim:#123A73;--blue-tint:#DAE4F3;--ochre:#C97A25;--ochre-tint:#F1DDBF;--border:#1A1A1A;--seg-off:#E3DACB;--fg:var(--red)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+input,select{-webkit-user-select:text;user-select:text}
+body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2.2rem 1.2rem 5rem}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 88% 6%,var(--yellow) 0 58px,transparent 59px),radial-gradient(circle at 4% 94%,var(--blue) 0 42px,transparent 43px);background-repeat:no-repeat;opacity:.14;pointer-events:none;z-index:0}
+.header{text-align:center;margin-bottom:1.6rem;z-index:1}
+.label-top{font-weight:800;letter-spacing:.3em;font-size:1.5rem;text-transform:uppercase;margin-bottom:.25rem}
+.label-sub{font-size:.6rem;letter-spacing:.3em;color:rgba(26,26,26,.4);text-transform:uppercase}
+.header::after{content:'';display:block;width:84px;height:6px;margin:.6rem auto 0;background:linear-gradient(to right,var(--red) 0 33.33%,var(--yellow) 33.33% 66.66%,var(--blue) 66.66% 100%)}
+.tab-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.35rem;width:100%;max-width:360px;margin-bottom:1.1rem;z-index:1}
+.tab-btn{font-family:inherit;font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:.65rem .15rem;cursor:pointer;border:2px solid var(--border);background:var(--bg2);color:rgba(26,26,26,.45);transition:all .18s}
+.tab-btn.selected{color:#fff;background:var(--ink);box-shadow:2px 2px 0 var(--ink)}
+#tab-today.selected{background:var(--red);border-color:var(--red)}
+#tab-add.selected{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+#tab-meds.selected{background:var(--blue);border-color:var(--blue)}
+.panel{z-index:1;width:100%;max-width:360px;display:flex;flex-direction:column;gap:1.1rem}
+.panel.hidden,.hidden{display:none!important}
+.card{width:100%;background:var(--bg2);border:2px solid var(--border);padding:1.1rem 1.2rem;box-shadow:3px 3px 0 var(--ink)}
+.seg-display-card{display:flex;flex-direction:column;align-items:center;gap:.7rem;padding:1.6rem 1rem}
+.seg-scale-wrap{overflow:hidden;width:100%;display:flex;justify-content:center}
+.seg-row{display:flex;align-items:center;gap:3px}
+@media(max-width:359px){.seg-row{transform:scale(.78)}.seg-scale-wrap{height:61px}}
+.seg-digit{width:44px;height:78px;position:relative;flex-shrink:0}
+.seg{position:absolute;background:var(--seg-off);transition:background .05s}
+.seg.on{background:var(--fg)}
+.seg-a{top:2px;left:6px;width:32px;height:5px}.seg-g{top:36px;left:6px;width:32px;height:5px}.seg-d{top:70px;left:6px;width:32px;height:5px}
+.seg-f{top:6px;left:2px;width:5px;height:28px}.seg-b{top:6px;right:2px;width:5px;height:28px}.seg-e{top:42px;left:2px;width:5px;height:28px}.seg-c{top:42px;right:2px;width:5px;height:28px}
+.seg-colon{display:flex;flex-direction:column;gap:16px;align-self:center;margin:0 2px 4px;flex-shrink:0}
+.seg-dot{width:8px;height:8px;border-radius:50%;background:var(--fg)}
+.seg-label,.info-line,.progress-caption{font-size:.58rem;font-weight:600;letter-spacing:.25em;color:rgba(26,26,26,.35);text-transform:uppercase;text-align:center}
+.progress-track{width:100%;height:10px;background:var(--bg3);border:2px solid var(--border);overflow:hidden}
+.progress-fill{height:100%;width:0;background:var(--blue);transition:width .3s}
+.section-title,.alarm-title{font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;font-weight:800;color:rgba(26,26,26,.5);text-align:center;margin:.2rem 0 -.5rem}
+.alarm-title{color:var(--ink);text-align:left;margin:0 0 .7rem;font-size:.6rem}
+.btn{font-family:inherit;font-size:.78rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.75rem 0;cursor:pointer;border:2px solid var(--border);background:var(--bg2);color:var(--ink);transition:all .18s;flex:1;text-align:center}
+.btn:active{background:var(--bg3)}
+.btn-row{display:flex;gap:.6rem;width:100%}
+.btn-primary{background:var(--red);color:#fff;border-color:var(--red);box-shadow:3px 3px 0 var(--ink)}
+.btn-primary:active{background:var(--red-dim);box-shadow:1px 1px 0 var(--ink)}
+.btn-blue{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:3px 3px 0 var(--ink)}
+.btn-blue:active{background:var(--blue-dim)}
+.btn-yellow{background:var(--yellow);color:var(--ink);border-color:var(--yellow);box-shadow:3px 3px 0 var(--ink)}
+.btn-yellow:active{background:var(--yellow-dim)}
+.btn-danger{border-color:var(--red);color:var(--red);background:transparent}
+.btn-danger:active{background:var(--red-tint)}
+.btn-orange-outline{border-color:var(--ochre);color:var(--ochre);background:transparent}
+.btn-orange-outline:active{background:var(--ochre-tint)}
+.btn-sm{font-size:.62rem;padding:.55rem .8rem;flex:0 0 auto;letter-spacing:.1em}
+/* med rows */
+.med-row{display:flex;align-items:center;gap:.8rem;padding:.7rem 0;border-bottom:2px solid var(--border)}
+.med-row:last-child{border-bottom:none;padding-bottom:0}.med-row:first-child{padding-top:0}
+.med-row.taken{opacity:.55}
+.grp-head{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.8rem;padding-bottom:.7rem;border-bottom:2px solid var(--border)}
+.grp-time{font-weight:800;font-size:1rem;font-variant-numeric:tabular-nums;letter-spacing:.05em}.grp-time.due{color:var(--red)}
+#tab-prn.selected{background:var(--ochre);border-color:var(--ochre)}
+.since{font-variant-numeric:tabular-nums;color:var(--blue)}
+.med-info{flex:1;min-width:0}
+.med-name{font-weight:700;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.med-dose{font-size:.62rem;font-weight:600;letter-spacing:.04em;color:rgba(26,26,26,.55);margin-top:.1rem}
+.med-time{font-size:.72rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.04em;margin-top:.1rem}
+.chk{color:var(--blue);font-weight:800;margin-right:.3rem}
+.pill-ico{width:40px;height:40px;flex-shrink:0}
+.empty{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(26,26,26,.35);text-align:center;padding:.4rem 0;line-height:1.8}
+/* form */
+.field-label{font-size:.5rem;letter-spacing:.15em;text-transform:uppercase;font-weight:600;color:rgba(26,26,26,.5);margin-bottom:.3rem}
+.txt{font-family:inherit;font-weight:700;font-size:1rem;width:100%;background:transparent;border:none;outline:none;border-bottom:2px solid var(--border);padding:.2rem 0;color:var(--ink);border-radius:0}
+.txt:focus{border-color:var(--red)}
+.txt::placeholder{color:#B9AF98}
+select.txt{appearance:none;-webkit-appearance:none;cursor:pointer;font-size:.8rem;background:var(--bg2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.stack{display:flex;flex-direction:column;gap:.9rem}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:.8rem;background:var(--bg);border:2px solid var(--border);padding:.55rem .75rem}
+.toggle-row span{font-weight:700;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase}
+.switch{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background:var(--bg3);border:2px solid var(--blue);transition:.2s}
+.slider::before{position:absolute;content:'';height:16px;width:16px;left:2px;bottom:2px;background:var(--blue);transition:.2s;border-radius:50%}
+.switch input:checked+.slider{background:var(--blue)}
+.switch input:checked+.slider::before{background:#fff;transform:translateX(20px)}
+.shape-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem}
+.shape-btn{border:2px solid var(--border);background:var(--bg2);padding:.3rem;cursor:pointer;display:flex;justify-content:center;transition:all .18s}
+.shape-btn svg{width:32px;height:32px}
+.shape-btn.selected{background:var(--yellow);box-shadow:2px 2px 0 var(--ink)}
+.swatches{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center}
+.swatch{width:30px;height:30px;border:2px solid var(--border);cursor:pointer;padding:0}
+.swatch.selected{box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px);outline:2px solid var(--ink);outline-offset:1px}
+.pick-btn{position:relative;overflow:hidden;font-family:inherit;font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:.75rem 0;border:2px solid var(--border);background:var(--bg2);color:var(--ink);text-align:center;cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+.pick-btn:active{background:var(--bg3)}
+.custom-col{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
+.time-line{display:flex;align-items:flex-end;gap:.3rem;margin-bottom:.8rem}
+.time-field{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.time-field input{font-family:inherit;font-weight:700;font-size:1.4rem;width:100%;text-align:center;background:transparent;border:none;outline:none;border-bottom:2px solid var(--border);color:var(--ink);padding:.1rem 0;border-radius:0}
+.time-field input:focus{border-color:var(--red)}
+.time-field input::placeholder{color:#B9AF98}
+.time-sep{font-weight:700;font-size:1.2rem;color:rgba(26,26,26,.35);padding-bottom:.2rem}
+.x-btn{font-family:inherit;font-weight:800;width:30px;height:30px;border:2px solid var(--red);color:var(--red);background:transparent;cursor:pointer;flex-shrink:0;margin-left:.3rem}
+</style>
+</head>
+<body>
+<div class="header"><div class="label-top">Decimal Meds</div><div class="label-sub">medication tracker in decimal time</div></div>
+<div class="tab-row">
+  <button class="tab-btn selected" id="tab-today" onclick="switchTab('today')">Today</button>
+  <button class="tab-btn" id="tab-prn" onclick="switchTab('prn')">PRN</button>
+  <button class="tab-btn" id="tab-add" onclick="switchTab('add')">Add</button>
+  <button class="tab-btn" id="tab-meds" onclick="switchTab('meds')">Meds</button>
+</div>
+
+<!-- TODAY -->
+<div class="panel" id="panel-today">
+  <div class="card seg-display-card">
+    <div class="seg-scale-wrap"><div class="seg-row" id="clock-row"></div></div>
+    <div class="seg-label">hours &nbsp;·&nbsp; min &nbsp;·&nbsp; sec</div>
+  </div>
+  <div><div class="progress-track"><div class="progress-fill" id="prog"></div></div></div>
+  <div class="info-line" id="info">0 / 0 doses taken</div>
+  <div class="section-title">Scheduled</div>
+  <div class="stack" id="sched-list"></div>
+  <div id="prn-today-wrap" class="hidden stack"><div class="section-title" style="margin-bottom:0">PRN Taken Today</div><div class="card" id="prn-today"></div></div>
+</div>
+
+<!-- PRN -->
+<div class="panel hidden" id="panel-prn">
+  <div class="section-title">As Needed (PRN)</div>
+  <div class="card" id="prn-list"></div>
+</div>
+
+<!-- ADD -->
+<div class="panel hidden" id="panel-add">
+  <div class="card stack">
+    <div><div class="field-label">Medication name</div><input class="txt" id="f-name" placeholder="e.g. Ibuprofen" maxlength="40"></div>
+    <div class="toggle-row"><span>PRN (as needed)</span><label class="switch"><input type="checkbox" id="f-prn"><span class="slider"></span></label></div>
+  </div>
+  <div class="card stack">
+    <div class="alarm-title" style="margin:0">Dose</div>
+    <div class="grid2">
+      <div><div class="field-label">How many</div><input class="txt" id="f-qty" type="number" min="0.25" step="any" inputmode="decimal" placeholder="1"></div>
+      <div><div class="field-label">Form</div>
+        <select class="txt" id="f-form"><option>tablet</option><option>caplet</option><option>pill</option><option>capsule</option><option>softgel</option><option>drop</option><option>puff</option><option>patch</option><option>sachet</option><option>pouch</option><option>piece</option></select></div>
+    </div>
+    <div class="grid2">
+      <div><div class="field-label">Dose per each</div><input class="txt" id="f-per" type="number" min="0" step="any" inputmode="decimal" placeholder="250"></div>
+      <div><div class="field-label">Unit</div>
+        <select class="txt" id="f-unit"><option value="mcg">micrograms (mcg)</option><option value="mg" selected>milligrams (mg)</option><option value="g">grams (g)</option></select></div>
+    </div>
+    <div class="info-line" id="dose-preview" style="letter-spacing:.1em"></div>
+  </div>
+  <div class="card stack">
+    <div class="alarm-title" style="margin:0">Shape &amp; Colour</div>
+    <div class="shape-grid" id="shape-grid"></div>
+    <div class="stack" id="color-area"></div>
+  </div>
+  <div class="card" id="times-card">
+    <div class="alarm-title">Decimal time(s)</div>
+    <div class="toggle-row" style="margin-bottom:.9rem"><span>Multiple times a day</span><label class="switch"><input type="checkbox" id="f-multi"><span class="slider"></span></label></div>
+    <div id="time-rows"></div>
+    <div class="btn-row hidden" id="add-time-wrap"><button class="btn btn-orange-outline" onclick="addTimeRow()">+ Add time</button></div>
+  </div>
+  <div class="btn-row"><button class="btn btn-primary" onclick="saveMed()">Save Medication</button></div>
+</div>
+
+<!-- MEDS -->
+<div class="panel hidden" id="panel-meds">
+  <div class="section-title">Your Medications</div>
+  <div class="card" id="all-list"></div>
+</div>
+
+<script>
+document.addEventListener('selectstart',e=>{if(!['INPUT','SELECT'].includes(e.target.tagName))e.preventDefault()});
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+
+/* ── 7-SEGMENT ── */
+const SEG={'0':[1,1,1,1,1,1,0],'1':[0,1,1,0,0,0,0],'2':[1,1,0,1,1,0,1],'3':[1,1,1,1,0,0,1],'4':[0,1,1,0,0,1,1],'5':[1,0,1,1,0,1,1],'6':[1,0,1,1,1,1,1],'7':[1,1,1,0,0,0,0],'8':[1,1,1,1,1,1,1],'9':[1,1,1,1,0,1,1]};
+const clockDigits=[];
+['d','d','c','d','d','c','d','d'].forEach(p=>{
+  const row=$('clock-row');
+  if(p==='c'){const c=document.createElement('div');c.className='seg-colon';c.innerHTML='<div class="seg-dot"></div><div class="seg-dot"></div>';row.appendChild(c);return}
+  const d=document.createElement('div');d.className='seg-digit';
+  'abcdefg'.split('').forEach(s=>{const e=document.createElement('div');e.className='seg seg-'+s;d.appendChild(e)});
+  row.appendChild(d);clockDigits.push(d);
+});
+function writeClock(str){str.split('').forEach((ch,i)=>{const p=SEG[ch];'abcdefg'.split('').forEach((n,j)=>clockDigits[i].querySelector('.seg-'+n).classList.toggle('on',!!p[j]))})}
+
+/* ── DECIMAL TIME (BC, permanent UTC-7) ── */
+const BC=-7*3600000;
+function nowDecSec(){const ms=((Date.now()+BC)%86400000+86400000)%86400000;return ms/864} // 0..99999.99
+const fmt=t=>{t=Math.floor(t);return pad(Math.floor(t/10000)%10)+':'+pad(Math.floor(t/100)%100)+':'+pad(t%100)};
+const todayKey=()=>new Date(Date.now()+BC).toISOString().slice(0,10);
+
+/* ── STATE ── */
+const KEY='decimalMedsV1';
+let state={meds:[],log:{date:todayKey(),taken:{},prn:{}}};
+try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&r.meds)state=r}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+function rollDay(){if(state.log.date!==todayKey()){state.log={date:todayKey(),taken:{},prn:{}};save();return true}return false}
+
+/* ── SHAPES & COLOURS ── */
+const R=(x)=>`<g transform="rotate(-35 20 20)">${x}</g>`;
+const SHAPES={
+  tablet:()=>'<circle cx="20" cy="20" r="15"/><line x1="8" y1="20" x2="32" y2="20"/>',
+  caplet:()=>R('<rect x="3" y="12" width="34" height="16" rx="7"/><line x1="20" y1="12" x2="20" y2="28"/>'),
+  capsule:(a,b)=>R(`<path fill="${a}" d="M12 11H20V29H12A9 9 0 0 1 12 11Z"/><path fill="${b}" d="M20 11H28A9 9 0 0 1 28 29H20Z"/>`),
+  softgel:()=>R('<ellipse cx="20" cy="20" rx="16" ry="10"/><path d="M9 17Q13 13 19 13" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>'),
+  pill:()=>'<circle cx="20" cy="20" r="10"/>',
+  drop:()=>'<path d="M20 3C20 3 33 18 33 26A13 13 0 0 1 7 26C7 18 20 3 20 3Z"/>',
+  patch:()=>'<rect x="5" y="5" width="30" height="30" rx="7"/><rect x="14" y="14" width="12" height="12" rx="2" fill="#fff"/>',
+  sachet:()=>'<rect x="6" y="6" width="28" height="28"/><line x1="6" y1="12" x2="34" y2="12"/>',
+  ovaltablet:()=>'<ellipse cx="20" cy="20" rx="16" ry="11"/><line x1="20" y1="9" x2="20" y2="31"/>',
+  hextablet:()=>'<polygon points="20,3 34,11.5 34,28.5 20,37 6,28.5 6,11.5"/><line x1="10" y1="20" x2="30" y2="20"/>',
+  abilify:()=>'<rect x="2" y="9" width="36" height="22" rx="6"/>',
+  pouch:()=>'<rect x="3" y="11" width="34" height="18" rx="6"/><path d="M8 15H32M8 25H32" fill="none" stroke-width="1.5" stroke-dasharray="2 2"/>'
+};
+const SHAPEFORM={ovaltablet:'tablet',hextablet:'tablet',abilify:'tablet'};
+const shapeSVG=(s,c,cls='',c2)=>`<svg class="${cls}" viewBox="0 0 40 40" fill="${c}" stroke="#1A1A1A" stroke-width="2.5" stroke-linejoin="round">${(SHAPES[s]||SHAPES.tablet)(c,c2||c)}</svg>`;
+let selShape='tablet',selColor='#D7263D',selColor2='#FFFFFF';
+const swRow=(w,cur)=>`<div class="pick-btn">Pick colour<input type="color" class="custom-col" value="${cur}" oninput="pickColor(${w},this.value)"></div>`;
+function renderShapes(){$('shape-grid').innerHTML=Object.keys(SHAPES).map(k=>`<button type="button" class="shape-btn ${k===selShape?'selected':''}" onclick="pickShape('${k}')">${shapeSVG(k,selColor,'',selColor2)}</button>`).join('')}
+function renderColors(){const cap=selShape==='capsule';$('color-area').innerHTML=(cap?'<div class="field-label">Capsule half 1</div>':'')+`<div>${swRow(1,selColor)}</div>`+(cap?`<div class="field-label">Capsule half 2</div><div>${swRow(2,selColor2)}</div>`:'')}
+function renderPickers(){renderShapes();renderColors()}
+function pickShape(s){selShape=s;const f=SHAPEFORM[s]||s;if([...$('f-form').options].some(o=>o.value===f))$('f-form').value=f;renderPickers();updatePreview()}
+function pickColor(w,c){if(w===1)selColor=c;else selColor2=c;renderShapes()}
+
+/* ── DOSE TEXT: count × dose-per-each ── */
+function doseText(m){
+  const q=m.qty,f=m.form+(q===1?'':'s');
+  return `${q} ${f} × ${m.per} ${m.unit}`;
+}
+
+/* ── TIME ROWS (form) ── */
+function timeRowHTML(multi,i){
+  return `<div class="time-line" data-row><div class="time-field"><div class="field-label">Hr (0–9)</div><input type="number" class="t-h" min="0" max="9" placeholder="0" inputmode="numeric"></div><div class="time-sep">:</div><div class="time-field"><div class="field-label">Min (00–99)</div><input type="number" class="t-m" min="0" max="99" placeholder="00" inputmode="numeric"></div>${multi&&i>0?'<button type="button" class="x-btn" onclick="this.parentNode.remove()">×</button>':''}</div>`;
+}
+function addTimeRow(){const n=document.querySelectorAll('[data-row]').length;$('time-rows').insertAdjacentHTML('beforeend',timeRowHTML(true,n))}
+function resetTimeRows(){$('time-rows').innerHTML=timeRowHTML(false,0)}
+$('f-multi').addEventListener('change',function(){
+  $('add-time-wrap').classList.toggle('hidden',!this.checked);
+  if(!this.checked){const first=document.querySelector('[data-row]');$('time-rows').innerHTML='';$('time-rows').appendChild(first)}
+});
+$('f-prn').addEventListener('change',function(){$('times-card').classList.toggle('hidden',this.checked)});
+function updatePreview(){
+  const q=parseFloat($('f-qty').value),p=parseFloat($('f-per').value);
+  $('dose-preview').textContent=(q>0&&p>=0&&$('f-per').value!=='')?'Shows as: '+doseText({qty:q,form:$('f-form').value,per:p,unit:$('f-unit').value}):'';
+}
+['f-qty','f-per','f-form','f-unit'].forEach(id=>{$(id).addEventListener('input',updatePreview);$(id).addEventListener('change',updatePreview)});
+
+function saveMed(){
+  const name=$('f-name').value.trim(),qty=parseFloat($('f-qty').value),per=parseFloat($('f-per').value),prn=$('f-prn').checked;
+  if(!name){return flash('f-name')}
+  if(!(qty>0)){return flash('f-qty')}
+  if(!(per>=0)||$('f-per').value===''){return flash('f-per')}
+  let times=[];
+  if(!prn){
+    document.querySelectorAll('[data-row]').forEach(r=>{
+      const h=Math.min(9,Math.max(0,parseInt(r.querySelector('.t-h').value)||0)),m=Math.min(99,Math.max(0,parseInt(r.querySelector('.t-m').value)||0));
+      times.push(h*10000+m*100);
+    });
+    times=[...new Set(times)].sort((a,b)=>a-b);
+  }
+  state.meds.push({id:'m'+Date.now(),name,prn,qty,form:$('f-form').value,per,unit:$('f-unit').value,shape:selShape,color:selColor,color2:selColor2,times});
+  save();playChime(getAudioCtx());
+  $('f-name').value='';$('f-qty').value='';$('f-per').value='';$('f-prn').checked=false;$('f-multi').checked=false;
+  $('times-card').classList.remove('hidden');$('add-time-wrap').classList.add('hidden');resetTimeRows();updatePreview();
+  render();switchTab('today');
+}
+function flash(id){const e=$(id);e.style.borderColor='var(--red)';e.focus();setTimeout(()=>e.style.borderColor='',1200)}
+
+/* ── RENDER ── */
+function slots(){
+  const out=[];
+  state.meds.filter(m=>!m.prn).forEach(m=>m.times.forEach((t,i)=>out.push({m,t,key:m.id+':'+i})));
+  return out.sort((a,b)=>a.t-b.t);
+}
+const ico=(m)=>shapeSVG(m.shape,m.color,'pill-ico',m.color2);
+function render(){
+  const now=nowDecSec(),sl=slots();let taken=0;
+  const groups={};sl.forEach(s=>(groups[s.t]=groups[s.t]||[]).push(s));
+  $('sched-list').innerHTML=sl.length?Object.keys(groups).map(Number).sort((a,b)=>a-b).map(t=>{
+    const g=groups[t],all=g.every(s=>state.log.taken[s.key]!==undefined),due=!all&&now>=t;
+    const rows=g.map(s=>{
+      const tk=state.log.taken[s.key],isT=tk!==undefined;if(isT)taken++;
+      return `<div class="med-row ${isT?'taken':''}">${ico(s.m)}<div class="med-info"><div class="med-name">${isT?'<span class="chk">✓</span>':''}${esc(s.m.name)}</div><div class="med-dose">${esc(doseText(s.m))}</div>${isT?`<div class="med-time">taken ${fmt(tk)}<br>timer <span class="since" data-t="${tk}"></span></div>`:''}</div><button class="btn btn-sm ${isT?'btn-danger':'btn-blue'}" onclick="toggleTaken('${s.key}')">${isT?'Undo':'Take'}</button></div>`;
+    }).join('');
+    const head=`<div class="grp-head"><div class="grp-time ${due?'due':''}">${fmt(t)}${due?' · due':''}</div>${g.length>1?`<button class="btn btn-sm ${all?'btn-danger':'btn-primary'}" onclick="takeGroup(${t})">${all?'Undo all':'Take all'}</button>`:''}</div>`;
+    return `<div class="card">${head}${rows}</div>`;
+  }).join(''):'<div class="card"><div class="empty">No scheduled meds<br>add one in the Add tab</div></div>';
+  const prn=state.meds.filter(m=>m.prn);
+  $('prn-list').innerHTML=prn.length?prn.map(m=>{
+    const l=state.log.prn[m.id]||[],last=l[l.length-1];
+    return `<div class="med-row">${ico(m)}<div class="med-info"><div class="med-name">${esc(m.name)}</div><div class="med-dose">${esc(doseText(m))}</div><div class="med-time" style="color:rgba(26,26,26,.55)">${l.length?`${l.length}× today · last ${fmt(last)}<br>timer <span class="since" data-t="${last}"></span>`:'not taken today'}</div></div><div style="display:flex;flex-direction:column;gap:.3rem"><button class="btn btn-sm btn-yellow" onclick="takePRN('${m.id}')">Take</button>${l.length?`<button class="btn btn-sm btn-danger" style="padding:.35rem .5rem" onclick="undoPRN('${m.id}')">Undo</button>`:''}</div></div>`;
+  }).join(''):'<div class="empty">No PRN meds<br>add one in the Add tab</div>';
+  const ent=[];state.meds.filter(m=>m.prn).forEach(m=>(state.log.prn[m.id]||[]).forEach(t=>ent.push({m,t})));
+  ent.sort((a,b)=>b.t-a.t);
+  $('prn-today-wrap').classList.toggle('hidden',!ent.length);
+  $('prn-today').innerHTML=ent.map(e=>`<div class="med-row">${ico(e.m)}<div class="med-info"><div class="med-name">${esc(e.m.name)} · PRN</div><div class="med-dose">${esc(doseText(e.m))}</div><div class="med-time">taken ${fmt(e.t)}<br>timer <span class="since" data-t="${e.t}"></span></div></div></div>`).join('');
+  $('info').textContent=`${taken} / ${sl.length} doses taken`;
+  $('prog').style.width=(sl.length?taken/sl.length*100:0)+'%';
+  $('all-list').innerHTML=state.meds.length?state.meds.map(m=>`<div class="med-row">${ico(m)}<div class="med-info"><div class="med-name">${esc(m.name)}${m.prn?' · PRN':''}</div><div class="med-dose">${esc(doseText(m))}</div><div class="med-time" style="font-size:.6rem;color:rgba(26,26,26,.55)">${m.prn?'as needed':m.times.map(fmt).join(' · ')}</div></div><button class="btn btn-sm ${pendingDel===m.id?'btn-primary':'btn-danger'}" onclick="delMed('${m.id}')">${pendingDel===m.id?'Sure?':'Delete'}</button></div>`).join(''):'<div class="empty">Nothing here yet</div>';
+  updateSince();
+}
+function updateSince(){const n=nowDecSec();document.querySelectorAll('.since').forEach(e=>{e.textContent=fmt(Math.max(0,n-e.dataset.t))})}
+function toggleTaken(k){
+  if(state.log.taken[k]!==undefined)delete state.log.taken[k];
+  else{state.log.taken[k]=Math.floor(nowDecSec());playChime(getAudioCtx())}
+  save();render();
+}
+function takeGroup(t){
+  const g=slots().filter(s=>s.t===t),all=g.every(s=>state.log.taken[s.key]!==undefined);
+  if(all)g.forEach(s=>delete state.log.taken[s.key]);
+  else{const n=Math.floor(nowDecSec());g.forEach(s=>{if(state.log.taken[s.key]===undefined)state.log.taken[s.key]=n});playChime(getAudioCtx())}
+  save();render();
+}
+function takePRN(id){(state.log.prn[id]=state.log.prn[id]||[]).push(Math.floor(nowDecSec()));playChime(getAudioCtx());save();render()}
+function undoPRN(id){(state.log.prn[id]||[]).pop();save();render()}
+let pendingDel=null,delTimer=null;
+function delMed(id){
+  if(pendingDel!==id){pendingDel=id;render();clearTimeout(delTimer);delTimer=setTimeout(()=>{pendingDel=null;render()},3000);return}
+  pendingDel=null;
+  state.meds=state.meds.filter(m=>m.id!==id);delete state.log.prn[id];
+  Object.keys(state.log.taken).forEach(k=>{if(k.startsWith(id+':'))delete state.log.taken[k]});
+  save();render();
+}
+function switchTab(t){
+  ['today','prn','add','meds'].forEach(n=>{$('tab-'+n).classList.toggle('selected',n===t);$('panel-'+n).classList.toggle('hidden',n!==t)});
+}
+
+/* ── AUDIO ── */
+let audioCtx=null;
+function getAudioCtx(){
+  if(!audioCtx||audioCtx.state==='closed')audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state!=='running')audioCtx.resume().catch(()=>{});
+  return audioCtx;
+}
+function wake(){if(audioCtx){if(audioCtx.state==='closed')audioCtx=new(window.AudioContext||window.webkitAudioContext)();else if(audioCtx.state!=='running')audioCtx.resume().catch(()=>{})}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')wake()});
+window.addEventListener('pageshow',wake);window.addEventListener('focus',wake);
+let clickBuf=null;
+function playButtonClickSound(){
+  try{
+    const ctx=getAudioCtx(),now=ctx.currentTime;
+    if(!clickBuf){const len=Math.floor(ctx.sampleRate*.03);clickBuf=ctx.createBuffer(1,len,ctx.sampleRate);const d=clickBuf.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,4)}
+    const n=ctx.createBufferSource();n.buffer=clickBuf;
+    const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.setValueAtTime(2600,now);bp.Q.value=.9;
+    const ng=ctx.createGain();ng.gain.setValueAtTime(.5,now);ng.gain.exponentialRampToValueAtTime(.001,now+.022);
+    n.connect(bp).connect(ng).connect(ctx.destination);n.start(now);n.stop(now+.03);
+    const th=ctx.createOscillator(),tg=ctx.createGain();th.type='sine';
+    th.frequency.setValueAtTime(180,now);th.frequency.exponentialRampToValueAtTime(90,now+.02);
+    tg.gain.setValueAtTime(.18,now);tg.gain.exponentialRampToValueAtTime(.001,now+.025);
+    th.connect(tg).connect(ctx.destination);th.start(now);th.stop(now+.03);
+  }catch(e){}
+}
+document.addEventListener('click',e=>{const b=e.target.closest('button,.pick-btn');if(b&&!b.classList.contains('alarm-btn'))playButtonClickSound()},true);
+
+function playToggleSound(on){
+  try{
+    const ctx=getAudioCtx(),t=ctx.currentTime,o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='triangle';
+    o.frequency.setValueAtTime(on?520:880,t);o.frequency.exponentialRampToValueAtTime(on?880:520,t+.09);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.22,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+.12);
+    o.connect(g).connect(ctx.destination);o.start(t);o.stop(t+.14);
+  }catch(e){}
+}
+document.querySelectorAll('.switch input').forEach(i=>i.addEventListener('change',()=>playToggleSound(i.checked)));
+function playChime(ctx){[523.25,659.25,783.99,1046.5].forEach((f,i)=>setTimeout(()=>{
+  const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+  o.type='sine';o.frequency.setValueAtTime(f,ctx.currentTime);
+  g.gain.setValueAtTime(0,ctx.currentTime);g.gain.linearRampToValueAtTime(.25,ctx.currentTime+.02);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+1.4);
+  o.start(ctx.currentTime);o.stop(ctx.currentTime+1.5)},i*120))}
+/* ── TICK ── */
+let lastSec=-1;
+function tick(){
+  rollDay();
+  const t=Math.floor(nowDecSec());
+  writeClock(fmt(t).replace(/:/g,''));
+  if(t!==lastSec){if(t%100===0||lastSec<0)render();lastSec=t}
+  updateSince();
+}
+renderPickers();resetTimeRows();render();tick();setInterval(tick,100);
+</script>
+</body>
+</html>
